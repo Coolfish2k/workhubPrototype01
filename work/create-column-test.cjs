@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const fixture={board:0,boards:[{name:'열 기능 검증',desc:'테스트',fields:[{id:'d',name:'날짜',type:'date',required:false},{id:'n',name:'금액',type:'number',required:false},{id:'kind',name:'구분',type:'select',options:['일반','긴급'],required:false},{id:'dept',name:'부서',type:'select',options:['운영','지원'],required:false},{id:'memo',name:'메모',type:'text',required:false}],records:[{id:1,d:'2026-10-01',n:'2',kind:'일반',dept:'운영',memo:'첫째'},{id:2,d:'2026-11-02',n:'10',kind:'긴급',dept:'운영',memo:'둘째'},{id:3,d:'2026-09-01',n:'100',kind:'긴급',dept:'지원',memo:'셋째'},{id:4,kind:'일반',dept:'지원',memo:'최근 등록'}],history:[]}]};
+let app=fs.readFileSync(path.join(root,'workhub-source/app.js'),'utf8');
+app=app.replace(/let state=[\s\S]*?\nlet tab=/,'let state='+JSON.stringify(fixture)+';\nlet tab=');
+app=app.replace('workhub-prototype-v1','workhub-column-test-v1');
+fs.writeFileSync(path.join(root,'work/column-test-app.js'),app);
+let html=fs.readFileSync(path.join(root,'workhub-source/index.html'),'utf8');
+html=html.replace('href="styles.css"','href="../workhub-source/styles.css"').replace('src="local-files.js"','src="../workhub-source/local-files.js"').replace('src="app.js"','src="column-test-app.js"');
+fs.writeFileSync(path.join(root,'work/column-test.html'),html);

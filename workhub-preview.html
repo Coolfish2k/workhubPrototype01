@@ -1,0 +1,1561 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorkHub 업무 양식 프로토타입</title>
+  <style>
+/* Tokens follow the WorkHub kit's role names. Values are estimated from the brand greens. */
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#f5f4ef, #171a18);
+  --surface: light-dark(#ffffff, #212522);
+  --surface-soft: light-dark(#f8f8f5, #272b28);
+  --surface-inset: light-dark(#eff0ec, #2f3430);
+  --line: light-dark(#e4e5df, #3a403b);
+  --line-strong: light-dark(#c6cac2, #565d57);
+  --ink: light-dark(#1d2822, #eef2ee);
+  --ink-2: light-dark(#37443d, #d3d9d4);
+  --ink-3: light-dark(#59665f, #aab3ac);
+  --ink-4: light-dark(#6c7871, #939c95);
+  --accent: light-dark(#1f7f4f, #6fcf9b);
+  --on-accent: light-dark(#ffffff, #10231a);
+  --accent-ink: light-dark(#186a44, #8fe0b4);
+  --accent-soft: light-dark(#e5f3eb, #24392d);
+  --warn: light-dark(#94560a, #eeb368);
+  --warn-soft: light-dark(#fbf0df, #3c3020);
+  --danger: light-dark(#b93a2c, #f19a8f);
+  --danger-soft: light-dark(#fbe9e6, #402724);
+  --shadow-1: 0 1px 3px rgb(20 30 25 / .06);
+  --shadow-2: 0 4px 16px rgb(20 30 25 / .08);
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 14px;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, p { margin: 0; }
+i[data-icon], .wh-icon { display: inline-flex; flex: none; }
+svg { display: block; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+#workhub-proto {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  color: var(--ink);
+  font: 14px/1.5 'Segoe UI', 'Malgun Gothic', sans-serif;
+}
+
+/* Portal header */
+.wh-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  min-height: 60px;
+  padding: 8px 24px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+.wh-nav { display: flex; align-items: center; gap: 4px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.wh-nav span { padding: 6px 14px; border-radius: 999px; }
+.wh-nav-left { justify-content: flex-end; }
+.wh-nav .wh-current { background: var(--ink); color: var(--surface); }
+.wh-brand { display: flex; align-items: center; gap: 8px; }
+.wh-logo { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(135deg, #2f9e63, #186a44); }
+.wh-wordmark { display: flex; flex-direction: column; line-height: 1; }
+.wh-wordmark b { font-size: 18px; letter-spacing: .24em; }
+.wh-wordmark small { margin-top: 4px; font-size: 11px; font-weight: 600; letter-spacing: .42em; color: var(--ink-3); }
+
+/* Page heading */
+.wh-pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 18px 0 14px; }
+.wh-crumb { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; font-size: 13px; color: var(--ink-3); }
+.wh-pagehead h1 { font-size: 24px; font-weight: 700; line-height: 1.25; }
+.wh-chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+.wh-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+
+/* Sidebar */
+.wh-side { position: sticky; top: 16px; padding: 16px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); }
+.wh-side-title { padding: 0 8px 8px; font-size: 13px; font-weight: 700; color: var(--ink-3); }
+.wh-side hr { margin: 10px 8px 14px; border: 0; border-top: 1px solid var(--line); }
+.wh-side-item { display: flex; align-items: center; gap: 10px; padding: 6px 8px; font-weight: 600; color: var(--ink-2); }
+.wh-tile { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: var(--r-md); background: var(--accent-soft); color: var(--accent); }
+.wh-tile-warn { background: var(--warn-soft); color: var(--warn); }
+.wh-boards { display: flex; flex-direction: column; gap: 2px; }
+.wh-board { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: var(--r-md); background: transparent; text-align: left; cursor: pointer; }
+.wh-board:hover { background: var(--surface-soft); }
+.wh-board.selected { background: var(--surface-inset); }
+.wh-board b { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.wh-board small { display: block; font-size: 13px; color: var(--ink-3); }
+
+/* Buttons */
+.wh-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.wh-btn:hover { background: var(--surface-soft); border-color: var(--ink-4); }
+.wh-btn-primary { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.wh-btn-primary:hover { border-color: var(--accent-ink); background: var(--accent-ink); }
+.wh-btn-danger { border-color: var(--danger); background: var(--danger); color: light-dark(#fff, #2a1210); }
+.wh-btn-danger:hover { border-color: var(--danger); background: var(--danger); filter: brightness(.92); }
+.wh-btn-danger-line { border-color: var(--line-strong); color: var(--danger); }
+.wh-btn-danger-line:hover { border-color: var(--danger); background: var(--danger-soft); }
+.wh-btn-dashed { width: 100%; margin-top: 10px; border-style: dashed; }
+.wh-btn-sm { height: 30px; padding: 0 10px; font-size: 13px; }
+.wh-icon-btn { display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-3); cursor: pointer; }
+.wh-icon-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-4); }
+.wh-icon-btn:disabled { opacity: .35; cursor: default; }
+.wh-icon-btn-danger:hover:not(:disabled) { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
+.wh-link { padding: 0; border: 0; background: none; color: var(--ink); font-weight: 700; text-align: left; cursor: pointer; }
+.wh-link:hover { color: var(--accent-ink); text-decoration: underline; }
+.wh-file { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 3px 8px; border: 0; border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent-ink); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; text-align: left; cursor: pointer; }
+.wh-file:hover { text-decoration: underline; }
+
+/* Main card */
+.wh-main { min-width: 0; padding: 18px 20px 20px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); }
+.wh-main h2 { font-size: 18px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.wh-desc { margin-top: 2px; font-size: 13px; color: var(--ink-3); }
+.wh-tabrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin: 12px 0 14px; border-bottom: 1px solid var(--line); }
+.wh-tabs { display: flex; gap: 24px; overflow-x: auto; }
+.wh-tab { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 2px; border: 0; background: none; color: var(--ink-3); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.wh-tab:hover { color: var(--ink); }
+.wh-tab span { font-size: 13px; color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.wh-tab[aria-selected="true"] { color: var(--ink); font-weight: 700; }
+.wh-tab[aria-selected="true"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--ink); }
+.wh-tab:focus-visible { outline-offset: -2px; }
+.wh-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-bottom: 8px; }
+.wh-actions:empty { display: none; }
+.wh-filterbar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 10px 12px; margin-bottom: 12px; }
+.wh-filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wh-filter-grow { flex: 1 1 220px; }
+.wh-filter-label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.wh-filter-error:not(:empty) { margin: -4px 0 10px; }
+.wh-segment { display: flex; height: 36px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); }
+.wh-segment button { padding: 0 12px; border: 0; border-left: 1px solid var(--line-strong); background: none; color: var(--ink-2); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.wh-segment button:first-child { border-left: 0; }
+.wh-segment button:hover { background: var(--surface-soft); }
+.wh-segment button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.wh-segment button:focus-visible { outline-offset: -3px; }
+.wh-date-range { display: flex; align-items: center; gap: 6px; }
+.wh-date { position: relative; display: block; width: 136px; }
+.wh-date .wh-input { padding-right: 32px; font-variant-numeric: tabular-nums; }
+.wh-date-btn { position: absolute; top: 6px; right: 5px; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--ink-3); cursor: pointer; }
+.wh-date-btn:hover { background: var(--surface-inset); color: var(--ink); }
+.wh-date-native { position: absolute; right: 0; bottom: 0; width: 0; height: 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+.wh-search { position: relative; display: block; width: 100%; }
+.wh-search i { position: absolute; top: 11px; right: 10px; color: var(--ink-4); pointer-events: none; }
+.wh-search input { padding-right: 32px; }
+
+/* Inputs */
+.wh-input { width: 100%; min-width: 0; height: 36px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); }
+.wh-input:hover { border-color: var(--ink-4); }
+.wh-input:focus { border-color: var(--accent); outline: 2px solid var(--accent-soft); outline-offset: 0; }
+.wh-input::placeholder { color: var(--ink-4); }
+.wh-input[aria-invalid="true"] { border-color: var(--danger); }
+input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+
+/* Tables */
+.wh-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); }
+.wh-table-wrap.has-foot { border-bottom: 0; border-radius: var(--r-md) var(--r-md) 0 0; }
+.wh-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+.wh-table th { padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface-soft); color: var(--ink-3); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.wh-table td { height: 52px; padding: var(--wh-cell, 8px) 12px; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: middle; }
+.wh-table tbody:last-child tr:last-child td, .wh-table tbody:last-child td[rowspan] { border-bottom: 0; }
+.wh-table tbody:hover td { background: var(--surface-soft); }
+/* A record with several lines reads as one block: merged cells on top, lighter rules between lines. */
+.wh-record-lines td { height: 40px; }
+.wh-record-lines td[rowspan] { vertical-align: top; }
+.wh-record-lines tr:not(:last-child) td:not([rowspan]) { border-bottom-color: light-dark(#f0f1ec, #2f3430); }
+.wh-table .wh-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; color: var(--ink); }
+.wh-table .wh-nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wh-table .wh-empty-cell { height: 140px; text-align: center; color: var(--ink-3); }
+.wh-empty-cell .wh-btn { margin-top: 10px; }
+.wh-value { display: inline-block; max-width: 100%; cursor: pointer; }
+.wh-value:hover { color: var(--accent-ink); text-decoration: underline; }
+.wh-value:has(.wh-pill):hover { text-decoration: none; filter: brightness(.94); }
+.wh-wrap { display: block; min-width: 96px; max-width: 320px; overflow-wrap: anywhere; }
+.wh-muted { color: var(--ink-4); }
+.wh-th-btn { display: inline-flex; align-items: center; gap: 4px; margin: -4px -6px; padding: 4px 6px; border: 0; border-radius: var(--r-sm); background: none; color: inherit; font-weight: 700; cursor: pointer; }
+.wh-th-btn:hover { background: var(--surface-inset); color: var(--ink); }
+.wh-th-btn .wh-sort-icon { color: var(--ink-4); }
+.wh-num .wh-th-btn { flex-direction: row-reverse; }
+th[aria-sort="ascending"] .wh-th-btn, th[aria-sort="descending"] .wh-th-btn { color: var(--ink); }
+th[aria-sort="ascending"] .wh-sort-icon, th[aria-sort="descending"] .wh-sort-icon { color: var(--accent); }
+.wh-th-btn.is-filtered { background: var(--accent-soft); color: var(--accent-ink); }
+.wh-filter-count { font-variant-numeric: tabular-nums; }
+.wh-col-actions { position: sticky; right: 0; width: 1%; white-space: nowrap; text-align: center; border-left: 1px solid var(--line); }
+.wh-table td.wh-col-actions { background: var(--surface); }
+.wh-table tbody:hover td.wh-col-actions { background: var(--surface-soft); }
+.wh-row-actions { display: flex; justify-content: center; gap: 4px; }
+.wh-table-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; min-height: 46px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 0 0 var(--r-md) var(--r-md); background: var(--surface-soft); font-size: 13px; color: var(--ink-3); }
+.wh-table-foot b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.wh-table-foot .wh-foot-group { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+
+/* Status pills: the text carries the meaning, color only reinforces it. */
+.wh-pill { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; background: var(--surface-inset); color: var(--ink-2); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.wh-pill-success { background: var(--accent-soft); color: var(--accent-ink); }
+.wh-pill-warn { background: var(--warn-soft); color: var(--warn); }
+.wh-pill-danger { background: var(--danger-soft); color: var(--danger); }
+
+/* Filter popover */
+.wh-filter-popover { position: fixed; inset: auto; margin: 0; padding: 14px; max-width: calc(100vw - 24px); max-height: min(440px, calc(100vh - 24px)); overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); }
+.wh-filter-popover::backdrop { background: transparent; }
+.wh-popover-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wh-filter-popover h3 { font-size: 14px; font-weight: 700; }
+.wh-popover-actions { display: flex; gap: 6px; margin: 10px 0; }
+.wh-filter-options { display: grid; gap: 2px; }
+.wh-filter-options label { display: flex; align-items: center; gap: 8px; padding: 5px 2px; overflow-wrap: anywhere; cursor: pointer; }
+
+/* Schema tab */
+.wh-section + .wh-section { margin-top: 22px; }
+.wh-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.wh-section-head h3 { font-size: 14px; font-weight: 700; }
+.wh-section-head p { margin-top: 2px; font-size: 13px; color: var(--ink-3); }
+.wh-board-fields { margin-bottom: 18px; }
+.wh-schema-fields { overflow-x: auto; }
+.wh-fields-header, .wh-field-row { display: grid; grid-template-columns: minmax(160px, 1fr) 130px 44px 52px 74px 58px; gap: 10px; align-items: center; min-width: 580px; }
+.wh-fields-header { padding: 8px 12px; border-radius: var(--r-sm); background: var(--surface-soft); color: var(--ink-3); font-size: 13px; font-weight: 700; }
+.wh-field-editor { min-width: 580px; border-bottom: 1px solid var(--line); }
+.wh-field-row { padding: 8px 12px; }
+.wh-column-center { display: flex; justify-content: center; align-items: center; }
+.wh-order { display: flex; justify-content: center; gap: 4px; }
+.wh-options { margin: 0 12px 12px; padding: 12px; border-radius: var(--r-md); background: var(--surface-soft); }
+.wh-options-head { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--ink-3); }
+.wh-option-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin: 8px 0; }
+.wh-empty-note { padding: 28px; text-align: center; color: var(--ink-3); }
+.wh-actionbar { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; margin-top: 12px; padding: 10px 0; border-top: 1px solid var(--line); background: var(--surface); }
+.wh-actionbar-right { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.wh-error { font-size: 13px; font-weight: 600; color: var(--danger); }
+.wh-error:empty { display: none; }
+.wh-hint { font-size: 13px; color: var(--ink-3); }
+
+/* History */
+.wh-event { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 12px 4px; border-bottom: 1px solid var(--line); }
+.wh-event:last-child { border-bottom: 0; }
+.wh-event-meta { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.wh-event h3 { font-size: 14px; font-weight: 700; }
+.wh-event p { margin-top: 2px; color: var(--ink-2); overflow-wrap: anywhere; }
+
+/* Dialogs */
+.wh-dialog { width: min(720px, calc(100vw - 32px)); max-height: 85vh; padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: 0 18px 44px rgb(16 30 70 / .22); }
+.wh-dialog[open] { display: flex; flex-direction: column; }
+.wh-dialog form { display: contents; }
+.wh-dialog::backdrop { background: rgb(0 0 0 / .32); }
+.wh-dialog-sm { width: min(420px, calc(100vw - 32px)); }
+.wh-dialog-wide { width: min(960px, calc(100vw - 32px)); }
+.wh-dialog-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 20px; border-bottom: 1px solid var(--line); }
+.wh-dialog-head h3 { min-width: 0; font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.wh-dialog-head .wh-icon-btn { margin-left: auto; border-color: transparent; }
+.wh-dialog-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; }
+.wh-dialog-foot { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface-soft); }
+.wh-dialog-foot .wh-spacer { margin-left: auto; }
+.wh-record-view { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; margin: 0; }
+.wh-record-view > div { padding: 10px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.wh-record-view dt { margin-bottom: 2px; font-size: 13px; color: var(--ink-3); }
+.wh-record-view dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.wh-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.wh-form-field { display: grid; gap: 4px; align-content: start; min-width: 0; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.wh-form-field .wh-input, .wh-upload { font-size: 14px; font-weight: 400; }
+.wh-required { color: var(--danger); }
+.wh-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wh-lines-block { margin-top: 14px; }
+.wh-lines-block:first-child { margin-top: 0; }
+.wh-line-table td { height: auto; padding: 6px 8px; min-width: 130px; vertical-align: top; }
+.wh-line-table tbody:hover td { background: none; }
+.wh-line-table td.wh-line-remove { width: 1%; min-width: 0; padding-top: 9px; }
+.wh-line-add { margin-top: 8px; }
+.wh-upload { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); }
+.wh-upload-name { overflow-wrap: anywhere; }
+.wh-upload-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.wh-confirm-text { color: var(--ink-2); }
+
+/* Toast sits in the top layer so it stays visible above dialogs. */
+.wh-toast { position: fixed; inset: auto auto 24px 50%; transform: translateX(-50%); margin: 0; max-width: min(520px, calc(100vw - 32px)); padding: 10px 16px; border: 0; border-radius: var(--r-md); background: var(--ink); color: var(--surface); font-weight: 600; box-shadow: var(--shadow-2); }
+.wh-toast[data-tone="error"] { background: var(--danger); color: light-dark(#fff, #2a1210); }
+
+.wh-caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin-top: auto; padding-top: 18px; font-size: 13px; color: var(--ink-3); }
+
+@media (max-width: 1100px) {
+  .wh-top { grid-template-columns: 1fr; justify-items: center; gap: 6px; padding: 10px 16px; border-radius: 22px; }
+  .wh-brand { order: -1; }
+  .wh-nav-left, .wh-nav-right { flex-wrap: wrap; justify-content: center; font-size: 13px; }
+  .wh-nav span { padding: 3px 10px; }
+}
+@media (max-width: 860px) {
+  #workhub-proto { padding: 12px; }
+  .wh-layout { grid-template-columns: minmax(0, 1fr); }
+  .wh-side { position: static; padding: 10px; }
+  .wh-legacy, .wh-side > .wh-side-title { display: none; }
+  .wh-boards { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .wh-board { width: auto; }
+  .wh-board .wh-tile, .wh-board small { display: none; }
+  .wh-btn-dashed { margin-top: 6px; }
+  .wh-main { padding: 14px; }
+  .wh-segment { overflow-x: auto; }
+  .wh-filter-group, .wh-date-range { width: 100%; }
+  .wh-date { flex: 1 1 0; width: auto; }
+}
+@media (max-width: 600px) {
+  .wh-form-grid, .wh-record-view { grid-template-columns: minmax(0, 1fr); }
+  .wh-event { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .wh-dialog-body { padding: 14px; }
+  .wh-dialog-foot { flex-wrap: wrap; padding: 10px 14px; }
+}
+
+/* Developer notes */
+.dn-layer { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+.dn-pin { position: fixed; z-index: 40; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none; }
+.dn-pin img { display: block; width: 30px; height: 30px; }
+/* Only the visible circle takes clicks, so a pin can't block the control beside it. */
+.dn-pin::before { content: ''; position: absolute; top: 3px; left: 4px; width: 22px; height: 22px; border-radius: 50%; pointer-events: auto; }
+.dn-pin:hover img { filter: brightness(.95); }
+.dn-pin:focus-visible { outline: 0; }
+.dn-pin:focus-visible::before { outline: 2px solid var(--accent); }
+.dn-pin.is-checked::after { content: ''; position: absolute; top: 4px; left: 5px; width: 20px; height: 20px; border: 1px solid var(--accent); border-radius: 50%; pointer-events: none; }
+.dn-panel { position: fixed; inset: auto; width: min(400px, calc(100vw - 16px)); max-height: calc(100vh - 16px); margin: 0; padding: 12px 14px; overflow-y: auto; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font: 14px/1.5 'Segoe UI', 'Malgun Gothic', sans-serif; box-shadow: var(--shadow-2); }
+.dn-panel.is-checked { border-color: var(--accent); }
+.dn-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.dn-panel-head small { font-size: 12px; color: var(--ink-3); }
+.dn-panel-head h3 { font-size: 15px; font-weight: 700; }
+.dn-section { margin-top: 10px; }
+.dn-section h4 { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+.dn-must h4 { color: var(--accent-ink); }
+.dn-now h4 { color: var(--ink-3); }
+.dn-ask h4 { color: var(--warn); }
+.dn-section ul { margin: 0; padding-left: 18px; color: var(--ink-2); }
+.dn-section li + li { margin-top: 5px; }
+.dn-example { margin: 4px 0 0; padding: 8px 10px; overflow-x: auto; border-radius: var(--r-sm); background: var(--surface-soft); color: var(--ink); font: 13px/1.6 Consolas, 'Malgun Gothic', monospace; }
+.dn-check { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-weight: 600; cursor: pointer; }
+.dn-controls { display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 13px; color: var(--ink-3); white-space: nowrap; }
+.dn-controls b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.dn-list-screen + .dn-list-screen { margin-top: 20px; }
+.dn-list-screen > h3 { margin-bottom: 8px; font-size: 16px; font-weight: 700; }
+.dn-list-note { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); }
+.dn-list-note.is-checked { border-color: var(--accent); }
+.dn-list-title { margin: 0; font-size: 14px; font-weight: 700; }
+
+</style>
+
+
+
+</head>
+<body>
+<div id="workhub-proto" aria-label="WorkHub 업무 양식 프로토타입">
+
+  <header class="wh-top">
+    <nav class="wh-nav wh-nav-left" aria-label="현재 사이트 위치">
+      <span>홈</span><span>출결</span><span>휴가</span><span>리포트</span>
+    </nav>
+    <div class="wh-brand">
+      <span class="wh-logo">
+        <svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true">
+          <defs><linearGradient id="whgNav" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9fbe6"></stop><stop offset="1" stop-color="#6fe3a3"></stop></linearGradient></defs>
+          <circle cx="12" cy="12" r="8.4" fill="none" stroke="url(#whgNav)" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="12.6 5" transform="rotate(-18 12 12)"></circle>
+          <circle cx="12" cy="12" r="5.2" fill="none" stroke="rgba(234,247,238,.35)" stroke-width="1" stroke-linecap="round" stroke-dasharray="8.2 2.7" transform="rotate(32 12 12)"></circle>
+          <circle cx="12" cy="12" r="3" fill="url(#whgNav)"></circle>
+          <circle cx="11" cy="11" r="0.9" fill="rgba(255,255,255,.85)"></circle>
+        </svg>
+      </span>
+      <span class="wh-wordmark"><b>SASOHAN</b><small>WorkHub</small></span>
+    </div>
+    <nav class="wh-nav wh-nav-right" aria-label="현재 사이트 위치 (계속)">
+      <span class="wh-current">게시판</span><span>운영현황 리포트</span><span>조직도</span>
+    </nav>
+  </header>
+
+  <div class="wh-pagehead">
+    <div>
+      <p class="wh-crumb">홈 <i data-icon="chevronRight"></i> 게시판 <i data-icon="chevronRight"></i> 업무 양식</p>
+      <h1>업무 양식</h1>
+    </div>
+    <span class="wh-chip">PROTOTYPE · 예시 데이터</span>
+  </div>
+
+  <div class="wh-layout">
+    <aside class="wh-side">
+      <div class="wh-legacy">
+        <div class="wh-side-title">게시판</div>
+        <div class="wh-side-item"><span class="wh-tile"><i data-icon="megaphone"></i></span><span>공지 게시판</span></div>
+        <div class="wh-side-item"><span class="wh-tile wh-tile-warn"><i data-icon="wrench"></i></span><span>유지보수 게시판</span></div>
+        <div class="wh-side-item"><span class="wh-tile"><i data-icon="card"></i></span><span>결제(환급) 요청</span></div>
+        <hr>
+      </div>
+      <div class="wh-side-title">직접 만든 업무 양식</div>
+      <div id="wh-boards" class="wh-boards"></div>
+      <button type="button" id="wh-new-board" class="wh-btn wh-btn-dashed"><i data-icon="plus"></i> 업무 양식 만들기</button>
+    </aside>
+
+    <main class="wh-main">
+      <h2 id="wh-title"></h2>
+      <p id="wh-desc" class="wh-desc"></p>
+      <div class="wh-tabrow">
+        <div class="wh-tabs" role="tablist" aria-label="업무 공간">
+          <button type="button" role="tab" id="wh-tab-list" class="wh-tab" aria-controls="wh-panel" aria-selected="true" data-tab="list">데이터 목록<span data-tab-count="list"></span></button>
+          <button type="button" role="tab" id="wh-tab-schema" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="schema">양식 설정<span data-tab-count="schema"></span></button>
+          <button type="button" role="tab" id="wh-tab-history" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="history">변경 이력<span data-tab-count="history"></span></button>
+        </div>
+        <div id="wh-page-actions" class="wh-actions"></div>
+      </div>
+      <section id="wh-panel" role="tabpanel" aria-labelledby="wh-tab-list"></section>
+    </main>
+  </div>
+
+  <footer class="wh-caption">
+    <span>WorkHub · 업무를 하나의 공간에</span>
+    <span>프로토타입 · 서버 저장 및 실제 권한 제어 미연결</span>
+  </footer>
+
+  <div id="wh-toast" class="wh-toast" role="status" popover="manual"></div>
+</div>
+<script>
+// Browser-local file references. No server requests or invented absolute paths.
+window.workhubFiles = (() => {
+  let database;
+  function connect() {
+    if (!database) database = new Promise((resolve,reject) => {
+      const request = indexedDB.open('workhub-local-files-v1',1);
+      request.onupgradeneeded = () => request.result.createObjectStore('files',{keyPath:'id'});
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => reject(new Error('파일 저장소를 열 수 없습니다. 다른 프로토타입 창을 닫고 다시 시도해 주세요.'));
+    }).catch(error => { database = null; throw error; });
+    return database;
+  }
+  async function transaction(mode,operation) {
+    const db = await connect();
+    return new Promise((resolve,reject) => {
+      const tx = db.transaction('files',mode);
+      const request = operation(tx.objectStore('files'));
+      tx.oncomplete = () => resolve(request.result);
+      tx.onerror = () => reject(tx.error || request.error);
+      tx.onabort = () => reject(tx.error || new Error('파일 정보를 저장하지 못했습니다.'));
+    });
+  }
+  function parse(value) {
+    try { const metadata=JSON.parse(value); return metadata?.fileId && metadata?.name ? metadata : null; }
+    catch { return null; }
+  }
+  async function remember(file,handle) {
+    const id = crypto.randomUUID();
+    await transaction('readwrite',store=>store.put(handle?{id,handle}:{id,file}));
+    return JSON.stringify({fileId:id,name:file.name,mode:handle?'reference':'local-copy'});
+  }
+  async function read(value) {
+    const metadata = parse(value);
+    if(!metadata) throw new Error('연결된 파일이 없습니다. 파일을 선택해 주세요.');
+    const entry = await transaction('readonly',store=>store.get(metadata.fileId));
+    if(!entry) throw new Error('이 브라우저에 파일 연결 정보가 없습니다. 파일을 다시 선택해 주세요.');
+    if(entry.handle) {
+      const permission = await entry.handle.queryPermission({mode:'read'});
+      if(permission!=='granted' && await entry.handle.requestPermission({mode:'read'})!=='granted')
+        throw new Error('파일을 열려면 읽기 권한이 필요합니다.');
+      try { return await entry.handle.getFile(); }
+      catch { throw new Error('파일이 이동되거나 삭제되었습니다. 파일을 다시 선택해 주세요.'); }
+    }
+    return entry.file;
+  }
+  async function open(value) {
+    const target = window.open('about:blank','_blank');
+    if(!target) throw new Error('파일을 열 수 있도록 이 페이지의 팝업을 허용해 주세요.');
+    target.opener = null;
+    try {
+      const file = await read(value);
+      const previewable = /^(image\/(png|jpeg|gif|webp|bmp)|application\/pdf|text\/plain)$/.test(file.type);
+      const url = URL.createObjectURL(file);
+      if(previewable) target.location.replace(url);
+      else {
+        const link = document.createElement('a');
+        link.href=url;link.download=file.name;document.body.appendChild(link);link.click();link.remove();target.close();
+      }
+      setTimeout(()=>URL.revokeObjectURL(url),120000);
+      return previewable?'파일을 열었습니다.':'브라우저 미리보기를 지원하지 않는 파일은 다운로드로 열 수 있습니다.';
+    } catch(error) { target.close();throw error; }
+  }
+  return {parse,remember,read,open};
+})();
+
+// Standalone demo persistence. No server or shared database is connected.
+const storageKey = 'workhub-prototype-v1';
+let savedState = null;
+try { savedState = JSON.parse(localStorage.getItem(storageKey)); } catch {}
+window.openai = {
+  widgetState: savedState,
+  setWidgetState: async (state) => {
+    window.openai.widgetState = state;
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  }
+};
+
+(()=>{
+const root=document.getElementById('workhub-proto'),$=s=>root.querySelector(s),panel=$('#wh-panel');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iconPaths={
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  chevronRight:'<path d="m9 18 6-6-6-6"/>',
+  sortNone:'<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+  sortAsc:'<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+  sortDesc:'<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+  filter:'<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+  up:'<path d="m18 15-6-6-6 6"/>',
+  down:'<path d="m6 9 6 6 6-6"/>',
+  clip:'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  table:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M12 3v18"/>',
+  megaphone:'<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  calendar:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  card:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>'
+};
+const icon=(name,size=14)=>'<svg class="wh-icon" xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+iconPaths[name]+'</svg>';
+root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon,el.dataset.icon==='chevronRight'?12:15)});
+const baseFields=()=>[{id:'date',name:'사용일',type:'date',required:true},{id:'owner',name:'사용자',type:'text',required:true},{id:'dept',name:'소속',type:'text',required:false},{id:'memo',name:'메모',type:'text',required:false}];
+let state={board:0,boards:[{name:'카드 사용 내역',desc:'사용 내역과 증빙을 건별로 모아 관리합니다.',fields:baseFields(),records:[{id:1024,date:'2026-11-02',owner:'김서연',dept:'경영지원부',memo:'11월 사무용품 구매',status:'확인 대기',items:[{name:'복사용지 A4',amount:32000},{name:'잉크 카트리지',amount:58000}]},{id:1023,date:'2026-10-30',owner:'이도현',dept:'교육부',memo:'신입사원 교육',status:'확인 완료',items:[{name:'교육 교재',amount:108500}]},{id:1022,date:'2026-10-29',owner:'박지은',dept:'경영지원부',memo:'외부 미팅',status:'확인 대기',items:[{name:'회의실 대여',amount:60000},{name:'다과',amount:22500},{name:'주차비',amount:8000}]},{id:1021,date:'2026-10-28',owner:'최민수',dept:'운영부',memo:'지점 장비 구매',status:'확인 완료',items:[{name:'모니터',amount:249000}]},{id:1020,date:'2026-10-27',owner:'김서연',dept:'경영지원부',memo:'',status:'확인 완료',items:[{name:'택배비',amount:6500}]}],history:[{time:'2026.11.02 09:42',who:'김서연',title:'#1024 등록',detail:'상세 내역 2개 · 90,000원'},{time:'2026.10.30 15:10',who:'관리자',title:'#1023 상태 변경',detail:'확인 대기 → 확인 완료'},{time:'2026.10.27 10:00',who:'관리자',title:'양식 생성',detail:'카드 사용 내역 · 기본 항목 4개'}]},{name:'지연 사유 관리',desc:'업무별 지연 사유와 조치 내용을 기록합니다.',fields:[{id:'date',name:'발생일',type:'date',required:true},{id:'owner',name:'담당자',type:'text',required:true},{id:'memo',name:'지연 사유',type:'text',required:true}],records:[],history:[]}]};
+let tab='list',query='';
+let columnSort={id:'id',direction:'desc'},columnFilters={};
+let dateRange={preset:'all',from:'',to:''};
+let idDisplay='id';
+let schemaEditing=false,schemaDraft=null,boardDraft=null,toastTimer=null;
+
+// Every record is one 등록 번호 plus one or more lines. Field values live on the lines;
+// 줄마다 only decides what the form offers, so switching it never converts stored data.
+const newLineId=()=>'ln'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const recordMetaKeys=['id','createdAt','deleted','deletedAt','lines','items'];
+const sampleCreatedAt={1023:'2026.10.30 10:15',1022:'2026.10.29 14:20',1021:'2026.10.28 11:05',1020:'2026.10.27 16:40'};
+function migrateBoard(target){
+  if(target.records.some(record=>!record.lines&&Array.isArray(record.items))){
+    const amount=target.fields.find(field=>field.id==='amount');
+    if(!target.fields.some(field=>field.id==='item')){
+      const item={id:'item',name:'항목',type:'text',required:false,multi:true};
+      if(amount){amount.multi=true;target.fields.splice(target.fields.indexOf(amount),0,item);}
+      else target.fields.push(item,{id:'amount',name:'금액(원)',type:'number',required:false,multi:true});
+    }
+    if(!target.fields.some(field=>field.id==='status'))target.fields.push({id:'status',name:'상태',type:'select',required:false,options:['확인 대기','확인 완료']});
+  }
+  target.records.forEach(record=>{
+    if(Array.isArray(record.lines))return;
+    const first={lineId:newLineId()},extra=[];
+    Object.keys(record).filter(key=>!recordMetaKeys.includes(key)).forEach(key=>{first[key]=record[key];delete record[key];});
+    (Array.isArray(record.items)?record.items:[]).forEach((item,i)=>{
+      const line=i===0?first:{lineId:newLineId()};
+      line.item=item.name;line.amount=item.amount;
+      if(i>0)extra.push(line);
+    });
+    record.lines=[first,...extra];
+  });
+  target.records.forEach(record=>{
+    if(record.createdAt!==undefined)return;
+    const logged=(target.history||[]).find(entry=>entry.title==='#'+record.id+' 등록');
+    record.createdAt=logged?logged.time.replace(/-/g,'.'):(target.name==='카드 사용 내역'&&sampleCreatedAt[record.id])||null;
+  });
+}
+function hydrate(s){if(s?.privateContent?.state?.boards?.length){state=s.privateContent.state;tab=s.privateContent.tab||'list';}state.boards.forEach(migrateBoard);}
+hydrate(window.openai?.widgetState);
+function save(){const snapshot={modelContent:{board:board().name,view:tab,recordCount:visibleRecords().length,fields:activeFields().map(f=>f.name)},privateContent:{state,tab}};window.openai?.setWidgetState(snapshot)?.catch(()=>toast('브라우저에 저장하지 못했습니다. 저장 공간과 브라우저 설정을 확인해 주세요.','error'));}
+function board(){return state.boards[state.board]||state.boards[0]}
+function visibleRecords(target=board()){return target.records.filter(record=>!record.deleted)}
+function activeFields(){return board().fields.filter(field=>field.active!==false)}
+const visibleLines=record=>record.lines.filter(line=>!line.deleted);
+const isEmptyValue=value=>value===undefined||value===null||value==='';
+const fieldValues=(record,field)=>visibleLines(record).map(line=>line[field.id]).filter(value=>!isEmptyValue(value));
+// A field splits by line when 줄마다 is on, or when lines saved earlier still hold values for it.
+const spansLines=(record,field)=>!!field.multi||visibleLines(record).slice(1).some(line=>!isEmptyValue(line[field.id]));
+const now=()=>new Date().toLocaleString('sv-SE',{timeZone:'Asia/Seoul'}).slice(0,16).replace(/-/g,'.');
+function log(title,detail){board().history.unshift({time:now(),who:'관리자 (예시)',title,detail});}
+function toast(text,tone='ok'){
+  const el=$('#wh-toast');
+  clearTimeout(toastTimer);
+  if(el.matches(':popover-open'))el.hidePopover();
+  if(!text)return;
+  el.textContent=text;el.dataset.tone=tone;el.showPopover();
+  toastTimer=setTimeout(()=>{if(el.matches(':popover-open'))el.hidePopover()},tone==='error'?6000:3000);
+}
+
+/* Dialogs */
+function openDialog(html,{label,small,wide}={}){
+  const dialog=document.createElement('dialog');
+  dialog.className='wh-dialog'+(small?' wh-dialog-sm':'')+(wide?' wh-dialog-wide':'');
+  dialog.setAttribute('aria-label',label||'');
+  dialog.innerHTML=html;
+  root.appendChild(dialog);
+  dialog.addEventListener('close',()=>dialog.remove());
+  dialog.showModal();
+  return dialog;
+}
+// Removes right away; the native close event is queued and can lag behind.
+function closeDialog(dialog){if(dialog.open)dialog.close();dialog.remove();}
+function confirmDialog({title,body,confirmLabel,danger}){
+  return new Promise(resolve=>{
+    const dialog=openDialog('<div class="wh-dialog-head"><h3>'+esc(title)+'</h3></div><div class="wh-dialog-body"><p class="wh-confirm-text">'+esc(body)+'</p></div><div class="wh-dialog-foot"><span class="wh-spacer"></span><button type="button" class="wh-btn" data-answer="no" autofocus>취소</button><button type="button" class="wh-btn '+(danger?'wh-btn-danger':'wh-btn-primary')+'" data-answer="yes">'+esc(confirmLabel)+'</button></div>',{label:title,small:true});
+    const finish=answer=>{closeDialog(dialog);resolve(answer)};
+    dialog.querySelectorAll('[data-answer]').forEach(button=>button.onclick=()=>finish(button.dataset.answer==='yes'));
+    dialog.addEventListener('cancel',event=>{event.preventDefault();finish(false)});
+  });
+}
+const dialogHead=title=>'<div class="wh-dialog-head"><h3>'+esc(title)+'</h3><button type="button" class="wh-icon-btn" data-dialog-x aria-label="닫기">'+icon('x',16)+'</button></div>';
+
+/* Schema edits survive only until saved; leaving asks first when something changed. */
+const comparableFields=fields=>JSON.stringify(fields.map(field=>({id:field.id,name:field.name,type:field.type,required:!!field.required,multi:!!field.multi,options:field.type==='select'?field.options||[]:[]})));
+const schemaChanged=()=>!!schemaDraft&&(comparableFields(schemaDraft)!==comparableFields(activeFields())||boardDraft.name.trim()!==board().name||boardDraft.desc.trim()!==board().desc);
+async function leaveSchema(){
+  if(schemaChanged()&&!await confirmDialog({title:'저장하지 않은 변경 사항이 있습니다',body:'이동하면 양식 설정에서 변경한 내용이 사라집니다.',confirmLabel:'변경 사항 버리기',danger:true}))return false;
+  schemaEditing=false;schemaDraft=null;
+  return true;
+}
+
+function shell(){
+  $('#wh-title').textContent=board().name;$('#wh-desc').textContent=board().desc;
+  $('#wh-boards').innerHTML=state.boards.map((item,i)=>'<button type="button" class="wh-board '+(i===state.board?'selected':'')+'" data-board="'+i+'"'+(i===state.board?' aria-current="true"':'')+'><span class="wh-tile">'+icon('table',15)+'</span><span><b>'+esc(item.name)+'</b><small>내역 '+visibleRecords(item).length+'건</small></span></button>').join('');
+  root.querySelectorAll('[data-tab]').forEach(button=>button.setAttribute('aria-selected',button.dataset.tab===tab));
+  $('[data-tab-count="list"]').textContent=visibleRecords().length;
+  $('[data-tab-count="schema"]').textContent=activeFields().length;
+  $('[data-tab-count="history"]').textContent=board().history.length;
+  panel.setAttribute('aria-labelledby','wh-tab-'+tab);
+  $('#wh-page-actions').innerHTML='';
+}
+function render(){
+  shell();
+  if(tab==='list')list();
+  if(tab==='schema'){if(schemaEditing)schema();else schemaView();}
+  if(tab==='history')history();
+}
+
+/* Field display */
+function pillTone(value){
+  if(/완료|승인/.test(value))return 'success';
+  if(/대기|확인 중|접수|진행/.test(value))return 'warn';
+  if(/반려|취소|거절/.test(value))return 'danger';
+  return '';
+}
+function fieldText(field,record) {
+  const value=record[field.id];
+  if(value===undefined || value===null || value==='')return '—';
+  if(field.type==='upload')return window.workhubFiles.parse(value)?.name || '—';
+  if(field.type==='number' && Number.isFinite(Number(value)))return Number(value).toLocaleString('ko-KR');
+  return String(value);
+}
+function fieldValue(field,record) {
+  const text=fieldText(field,record);
+  if(text==='—')return '<span class="wh-muted">—</span>';
+  if(field.type==='upload')return '<button type="button" class="wh-file" data-open-attachment="'+esc(record[field.id])+'">'+icon('clip',12)+esc(text)+'</button>';
+  if(field.type==='select'){const tone=pillTone(text);return '<span class="wh-pill'+(tone?' wh-pill-'+tone:'')+'">'+esc(text)+'</span>';}
+  return esc(text);
+}
+// recordId is set in the list only. The value itself opens the detail; a span keeps the text selectable for copying.
+function detailValue(html,recordId,focusable){
+  return '<span class="wh-value" role="button" tabindex="'+(focusable?0:-1)+'" data-record="'+recordId+'">'+html+'</span>';
+}
+function fieldCell(field,line,attributes='',recordId=null,focusable=false){
+  const isEmpty=fieldText(field,line)==='—';
+  const canOpen=recordId!==null&&!isEmpty&&field.type!=='upload';
+  const value=field.type==='text'&&!isEmpty?'<span class="wh-wrap">'+esc(fieldText(field,line))+'</span>':fieldValue(field,line);
+  const inner=canOpen?detailValue(value,recordId,focusable):value;
+  const className=field.type==='number'?' class="wh-num"':field.type==='date'?' class="wh-nowrap"':'';
+  return '<td'+className+attributes+'>'+inner+'</td>';
+}
+function recordIdLabel(record){
+  if(idDisplay==='date')return record.createdAt?esc(record.createdAt):'—';
+  return record.id?'#'+record.id:'—';
+}
+function recordBody(record,fields,withActions){
+  const lines=visibleLines(record),rowspan=lines.length>1?' rowspan="'+lines.length+'"':'';
+  const toggleLabel=idDisplay==='date'?'등록 번호 보기':'등록일 보기';
+  const idCell=withActions?'<td class="wh-nowrap"'+rowspan+'><button type="button" class="wh-link" data-toggle-id="'+record.id+'" title="'+toggleLabel+'" aria-label="'+recordIdLabel(record)+', '+toggleLabel+'">'+recordIdLabel(record)+'</button></td>':'<td class="wh-nowrap"'+rowspan+'>'+(record.id?'#'+record.id:'—')+'</td>';
+  const actionCell='<td class="wh-col-actions"'+rowspan+'><div class="wh-row-actions"><button type="button" class="wh-btn wh-btn-sm" data-edit-record="'+record.id+'" aria-label="#'+record.id+' 수정">수정</button><button type="button" class="wh-icon-btn wh-icon-btn-danger" data-delete-record="'+record.id+'" aria-label="#'+record.id+' 삭제" title="이 내역 삭제">'+icon('trash',14)+'</button></div></td>';
+  // Only the first value in a record is a tab stop, so a row doesn't cost one Tab per column.
+  let focusable=withActions;
+  const cell=(field,line,attributes)=>{
+    const html=fieldCell(field,line,attributes,withActions?record.id:null,focusable);
+    if(html.includes('wh-value'))focusable=false;
+    return html;
+  };
+  return '<tbody class="wh-record'+(lines.length>1?' wh-record-lines':'')+'">'+lines.map((line,i)=>'<tr>'+(i===0?idCell:'')+fields.map(field=>spansLines(record,field)?cell(field,line,''):(i===0?cell(field,lines[0],rowspan):'')).join('')+(withActions&&i===0?actionCell:'')+'</tr>').join('')+'</tbody>';
+}
+
+/* Data list */
+function inDateRange(record){
+  if(!dateRange.from&&!dateRange.to)return true;
+  const day=(record.createdAt||'').slice(0,10).replace(/\./g,'-');
+  return !!day&&(!dateRange.from||day>=dateRange.from)&&(!dateRange.to||day<=dateRange.to);
+}
+function filterValues(record,field){
+  const values=fieldValues(record,field).map(String);
+  return values.length?values:[''];
+}
+function rows(){
+  const fields=activeFields();
+  const filtered=visibleRecords().filter(record=>
+    inDateRange(record) &&
+    (!query || [String(record.id),...visibleLines(record).flatMap(line=>fields.map(field=>fieldText(field,line)))].join(' ').toLowerCase().includes(query.toLowerCase())) &&
+    fields.filter(field=>field.type==='select').every(field=>!Array.isArray(columnFilters[field.id]) || filterValues(record,field).some(value=>columnFilters[field.id].includes(value)))
+  );
+  const field=columnSort.id==='id'?(idDisplay==='date'?{id:'createdAt',type:'text'}:{id:'id',type:'number'}):fields.find(field=>field.id===columnSort.id && field.type!=='select');
+  if(!field)return filtered.sort((a,b)=>b.id-a.id);
+  return filtered.sort((a,b)=>{
+    const systemField=field.id==='id'||field.id==='createdAt';
+    const rawA=systemField?a[field.id]:fieldValues(a,field)[0],rawB=systemField?b[field.id]:fieldValues(b,field)[0];
+    const valueA=field.type==='upload'?window.workhubFiles.parse(rawA)?.name:rawA;
+    const valueB=field.type==='upload'?window.workhubFiles.parse(rawB)?.name:rawB;
+    const emptyA=valueA===undefined||valueA===null||valueA===''||(field.type==='number'&&!Number.isFinite(Number(valueA)));
+    const emptyB=valueB===undefined||valueB===null||valueB===''||(field.type==='number'&&!Number.isFinite(Number(valueB)));
+    if(emptyA!==emptyB)return emptyA?1:-1;
+    if(emptyA)return a.id-b.id;
+    const comparison=field.type==='number'?Number(valueA)-Number(valueB):String(valueA).localeCompare(String(valueB),'ko',{numeric:true});
+    return (columnSort.direction==='asc'?comparison:-comparison)||a.id-b.id;
+  });
+}
+function headerCell(field){
+  const numClass=field.type==='number'?' class="wh-num"':'';
+  if(field.type==='select')return '<th scope="col"><button type="button" class="wh-th-btn" data-filter-field="'+esc(field.id)+'" aria-haspopup="dialog" aria-label="'+esc(field.name)+' 필터">'+esc(field.name)+icon('filter',12)+'<span class="wh-filter-count" data-filter-count="'+esc(field.id)+'"></span></button></th>';
+  return '<th scope="col"'+numClass+' aria-sort="none" data-sort-head="'+esc(field.id)+'"><button type="button" class="wh-th-btn" data-sort-field="'+esc(field.id)+'" aria-label="'+esc(field.name)+' 정렬">'+esc(field.name)+'<span class="wh-sort-icon" data-sort-icon>'+icon('sortNone',12)+'</span></button></th>';
+}
+const hasActiveConditions=()=>!!query||!!dateRange.from||!!dateRange.to||Object.values(columnFilters).some(Array.isArray);
+function emptyRow(colspan){
+  let message='조건에 맞는 내역이 없습니다.',action='<br><button type="button" class="wh-btn wh-btn-sm" data-reset-filters>검색·필터 초기화</button>';
+  if(!activeFields().length){message='아직 입력 항목이 없습니다. 먼저 양식을 설정해 주세요.';action='<br><button type="button" class="wh-btn wh-btn-sm" data-go-schema>양식 설정으로 이동</button>';}
+  else if(!visibleRecords().length){message='아직 등록된 내역이 없습니다.';action='<br><button type="button" class="wh-btn wh-btn-sm" data-add-record>'+icon('plus',13)+'내역 작성</button>';}
+  return '<tr><td colspan="'+colspan+'" class="wh-empty-cell">'+message+action+'</td></tr>';
+}
+function dataRows(){
+  const records=rows(),fields=activeFields();
+  const table=$('#wh-table');
+  table.querySelectorAll('tbody').forEach(body=>body.remove());
+  table.insertAdjacentHTML('beforeend',records.length?records.map(record=>recordBody(record,fields,true)).join(''):'<tbody>'+emptyRow(fields.length+2)+'</tbody>');
+  const total=visibleRecords().length;
+  const sums=fields.filter(field=>field.type==='number').map(field=>{
+    const sum=records.flatMap(record=>fieldValues(record,field)).reduce((acc,value)=>acc+(Number.isFinite(Number(value))?Number(value):0),0);
+    return '<span>'+esc(field.name)+' 합계 <b>'+sum.toLocaleString('ko-KR')+'</b></span>';
+  }).join('');
+  $('#wh-count').innerHTML='<div class="wh-foot-group"><span>'+(hasActiveConditions()?'<b>'+records.length+'</b>건 / 전체 '+total+'건':'총 <b>'+total+'</b>건')+'</span>'+(hasActiveConditions()?'<button type="button" class="wh-btn wh-btn-sm" data-reset-filters>검색·필터 초기화</button>':'')+'</div><div class="wh-foot-group">'+sums+'</div>';
+  root.querySelectorAll('[data-sort-head]').forEach(th=>{
+    const selected=columnSort.id===th.dataset.sortHead;
+    th.setAttribute('aria-sort',selected?(columnSort.direction==='asc'?'ascending':'descending'):'none');
+    th.querySelector('[data-sort-icon]').innerHTML=icon(selected?(columnSort.direction==='asc'?'sortAsc':'sortDesc'):'sortNone',12);
+  });
+  root.querySelectorAll('[data-filter-count]').forEach(span=>{
+    const values=columnFilters[span.dataset.filterCount];
+    span.textContent=Array.isArray(values)?values.length:'';
+    span.closest('button').classList.toggle('is-filtered',Array.isArray(values));
+  });
+}
+function openColumnFilter(field,anchor){
+  const popover=$('#wh-filter-popover');
+  const values=[...new Set([...(field.options||[]),...visibleRecords().flatMap(record=>filterValues(record,field))])];
+  const selected=columnFilters[field.id];
+  popover.innerHTML='<div class="wh-popover-head"><h3>'+esc(field.name)+'</h3><button type="button" class="wh-icon-btn" data-close-filter aria-label="필터 닫기">'+icon('x',14)+'</button></div><div class="wh-popover-actions"><button type="button" class="wh-btn wh-btn-sm" data-filter-all>전체 선택</button><button type="button" class="wh-btn wh-btn-sm" data-filter-none>전체 해제</button></div><div class="wh-filter-options">'+values.map((value,i)=>'<label><input type="checkbox" data-filter-value="'+i+'" '+(!Array.isArray(selected)||selected.includes(value)?'checked':'')+'><span>'+esc(value||'(비어 있음)')+'</span></label>').join('')+'</div>';
+  function selectAll(all){columnFilters[field.id]=all?null:[];popover.querySelectorAll('input[type="checkbox"]').forEach(input=>input.checked=all);dataRows();}
+  popover.querySelector('[data-filter-all]').onclick=()=>selectAll(true);
+  popover.querySelector('[data-filter-none]').onclick=()=>selectAll(false);
+  popover.querySelector('[data-close-filter]').onclick=()=>popover.hidePopover();
+  popover.querySelectorAll('[data-filter-value]').forEach(input=>input.onchange=()=>{
+    const checked=[...popover.querySelectorAll('[data-filter-value]:checked')].map(input=>values[Number(input.dataset.filterValue)]);
+    columnFilters[field.id]=checked.length===values.length?null:checked;dataRows();
+  });
+  if(popover.matches(':popover-open'))popover.hidePopover();
+  popover.showPopover();
+  const rect=anchor.getBoundingClientRect(),width=Math.min(280,window.innerWidth-24);
+  popover.style.width=width+'px';popover.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-width-12))+'px';
+  popover.style.top=Math.max(12,Math.min(rect.bottom+6,window.innerHeight-popover.offsetHeight-12))+'px';
+}
+const datePresets=[['all','전체'],['today','오늘'],['week','최근 7일'],['month','이번 달'],['year','올해']];
+function presetRange(preset){
+  const today=now().slice(0,10).replace(/\./g,'-');
+  if(preset==='today')return {from:today,to:today};
+  if(preset==='week'){
+    const [year,month,day]=today.split('-').map(Number);
+    return {from:new Date(Date.UTC(year,month-1,day-6)).toISOString().slice(0,10),to:today};
+  }
+  if(preset==='month')return {from:today.slice(0,8)+'01',to:today};
+  if(preset==='year')return {from:today.slice(0,5)+'01-01',to:today};
+  return {from:'',to:''};
+}
+// Accepts 260404, 20260404, 26.4.4 and 2026-04-04. Returns null when it isn't a real date.
+function parseDate(text){
+  const digits=text.trim().match(/^(\d{2}|\d{4})[.\-/ ]?(\d{1,2})[.\-/ ]?(\d{1,2})$/);
+  if(!digits)return null;
+  const year=Number(digits[1].length===2?'20'+digits[1]:digits[1]),month=Number(digits[2]),day=Number(digits[3]);
+  const date=new Date(Date.UTC(year,month-1,day));
+  if(date.getUTCMonth()!==month-1||date.getUTCDate()!==day)return null;
+  return date.toISOString().slice(0,10);
+}
+const dateInput=(key,label)=>'<span class="wh-date"><input class="wh-input" id="wh-date-'+key+'" inputmode="numeric" aria-label="'+label+'" placeholder="예: 260404" autocomplete="off"><button type="button" class="wh-date-btn" data-date-pick="'+key+'" aria-label="'+label+' 달력에서 고르기">'+icon('calendar',14)+'</button><input class="wh-date-native" type="date" tabindex="-1" aria-hidden="true" data-date-native="'+key+'"></span>';
+function syncDateControls(){
+  root.querySelectorAll('[data-date-preset]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.datePreset===dateRange.preset)));
+  ['from','to'].forEach(key=>{
+    const input=$('#wh-date-'+key);
+    input.value=dateRange[key];input.removeAttribute('aria-invalid');
+    $('[data-date-native="'+key+'"]').value=dateRange[key];
+  });
+  $('#wh-date-error').textContent=dateRange.from&&dateRange.to&&dateRange.from>dateRange.to?'시작일이 종료일보다 늦습니다.':'';
+}
+function bindFilterBar(){
+  syncDateControls();
+  root.querySelectorAll('[data-date-preset]').forEach(button=>button.onclick=()=>{
+    dateRange={preset:button.dataset.datePreset,...presetRange(button.dataset.datePreset)};
+    syncDateControls();dataRows();
+  });
+  function setDate(key,value){
+    dateRange={...dateRange,[key]:value};
+    dateRange.preset=!dateRange.from&&!dateRange.to?'all':'custom';
+    syncDateControls();dataRows();
+  }
+  ['from','to'].forEach(key=>{
+    const input=$('#wh-date-'+key),native=$('[data-date-native="'+key+'"]');
+    input.onchange=()=>{
+      if(!input.value.trim()){setDate(key,'');return;}
+      const parsed=parseDate(input.value);
+      if(parsed){setDate(key,parsed);return;}
+      input.setAttribute('aria-invalid','true');
+      $('#wh-date-error').textContent='날짜를 확인해 주세요. 예: 260404';
+    };
+    native.onchange=()=>setDate(key,native.value);
+    $('[data-date-pick="'+key+'"]').onclick=()=>{
+      try{native.showPicker();}catch{input.focus();}
+    };
+  });
+}
+function list(){
+  $('#wh-page-actions').innerHTML='<button type="button" class="wh-btn wh-btn-primary" data-add-record>'+icon('plus',14)+'내역 작성</button>';
+  panel.innerHTML='<div class="wh-filterbar"><div class="wh-filter-group"><span class="wh-filter-label">기간</span><div class="wh-segment" role="group" aria-label="기간">'+datePresets.map(([key,label])=>'<button type="button" data-date-preset="'+key+'" aria-pressed="false">'+label+'</button>').join('')+'</div></div><div class="wh-filter-group"><span class="wh-filter-label">직접 지정</span><span class="wh-date-range">'+dateInput('from','시작일')+'<span class="wh-muted">~</span>'+dateInput('to','종료일')+'</span></div><label class="wh-filter-group wh-filter-grow"><span class="wh-filter-label">검색어</span><span class="wh-search"><input class="wh-input" id="wh-search" placeholder="등록 번호, 입력 내용 검색" value="'+esc(query)+'"><i>'+icon('search',14)+'</i></span></label></div><p id="wh-date-error" class="wh-error wh-filter-error" role="alert"></p><div class="wh-table-wrap has-foot"><table class="wh-table" id="wh-table" aria-label="내역 목록"><thead><tr>'+headerCell({id:'id',name:'등록 번호',type:'text'})+activeFields().map(headerCell).join('')+'<th scope="col" class="wh-col-actions">관리</th></tr></thead></table></div><div class="wh-table-foot" id="wh-count"></div><div id="wh-filter-popover" class="wh-filter-popover" popover="auto"></div>';
+  bindFilterBar();
+  dataRows();
+  $('#wh-search').oninput=event=>{query=event.target.value;dataRows()};
+  root.querySelectorAll('[data-sort-field]').forEach(button=>button.onclick=()=>{
+    const id=button.dataset.sortField;
+    columnSort={id,direction:columnSort.id===id&&columnSort.direction==='asc'?'desc':'asc'};
+    dataRows();
+  });
+  root.querySelectorAll('[data-filter-field]').forEach(button=>button.onclick=()=>{const field=activeFields().find(field=>field.id===button.dataset.filterField);if(field)openColumnFilter(field,button)});
+}
+
+/* Record dialogs */
+function recordView(id){
+  const record=board().records.find(record=>record.id===id&&!record.deleted);
+  if(!record)return;
+  const fields=activeFields(),lineFields=fields.filter(field=>spansLines(record,field)),gridFields=fields.filter(field=>!spansLines(record,field)),lines=visibleLines(record);
+  const grid='<dl class="wh-record-view"><div><dt>등록일</dt><dd>'+(record.createdAt?esc(record.createdAt):'<span class="wh-muted">—</span>')+'</dd></div>'+gridFields.map(field=>'<div><dt>'+esc(field.name)+'</dt><dd>'+fieldValue(field,lines[0])+'</dd></div>').join('')+'</dl>';
+  const lineTable=lineFields.length?'<div class="wh-table-wrap wh-lines-block"><table class="wh-table" aria-label="줄별 내역"><thead><tr>'+lineFields.map(field=>'<th scope="col"'+(field.type==='number'?' class="wh-num"':'')+'>'+esc(field.name)+'</th>').join('')+'</tr></thead><tbody>'+lines.map(line=>'<tr>'+lineFields.map(field=>fieldCell(field,line)).join('')+'</tr>').join('')+'</tbody></table></div>':'';
+  const dialog=openDialog(dialogHead('#'+id+' 상세')+'<div class="wh-dialog-body">'+grid+lineTable+'</div><div class="wh-dialog-foot"><button type="button" class="wh-btn wh-btn-danger-line" data-dialog-delete>'+icon('trash',14)+'삭제</button><span class="wh-spacer"></span><button type="button" class="wh-btn" data-dialog-close>닫기</button><button type="button" class="wh-btn wh-btn-primary" data-dialog-edit>수정</button></div>',{label:'#'+id+' 상세',wide:lineFields.length>2});
+  dialog.querySelector('[data-dialog-x]').onclick=dialog.querySelector('[data-dialog-close]').onclick=()=>closeDialog(dialog);
+  dialog.querySelector('[data-dialog-edit]').onclick=()=>{closeDialog(dialog);recordForm(id)};
+  dialog.querySelector('[data-dialog-delete]').onclick=()=>deleteRecord(id,dialog);
+}
+async function deleteRecord(id,parentDialog){
+  const confirmed=await confirmDialog({title:'#'+id+' 내역을 삭제할까요?',body:'목록에서 숨겨집니다. 입력한 값과 변경 이력은 그대로 보존됩니다.',confirmLabel:'삭제',danger:true});
+  if(!confirmed)return;
+  const record=board().records.find(record=>record.id===id);
+  record.deleted=true;record.deletedAt=now();
+  log('#'+id+' 삭제','목록에서 숨김 · 값과 이력은 보존');
+  if(parentDialog)closeDialog(parentDialog);
+  save();render();toast('#'+id+' 내역을 삭제했습니다.');
+}
+function fieldControl(f, source, name = f.id, required = f.required) {
+  const value = String(source[f.id] ?? '');
+  const attributes = 'class="wh-input" name="' + esc(name) + '" aria-label="' + esc(f.name) + '"' + (required ? ' required' : '');
+  if (f.type === 'upload') {
+    const file = window.workhubFiles.parse(value);
+    return `<span class="wh-upload" data-upload-field="${esc(f.id)}" data-upload-name="${esc(f.name)}"${required?' data-upload-required':''}><input type="hidden" name="${esc(name)}" value="${esc(file?value:'')}"><span class="wh-upload-name">${esc(file?.name || '선택된 파일 없음')}</span><span class="wh-upload-actions"><button type="button" class="wh-btn wh-btn-sm" data-choose-file>파일 선택</button><button type="button" class="wh-btn wh-btn-sm" data-open-file ${file?'':'hidden'}>파일 열기</button></span><input type="file" data-file-fallback hidden></span>`;
+  }
+  if (f.type !== 'select') return '<input ' + attributes + ' type="' + esc(f.type) + '" value="' + esc(value) + '">';
+  const choices = Array.isArray(f.options) ? f.options : [];
+  // Keep a previously saved value selectable even after an option is removed.
+  const legacy = value && !choices.includes(value)
+    ? '<option value="' + esc(value) + '" selected>' + esc(value) + ' (이전 값)</option>' : '';
+  return '<select ' + attributes + '><option value="">선택해 주세요</option>' + legacy + choices.map(option =>
+    '<option value="' + esc(option) + '"' + (option === value ? ' selected' : '') + '>' + esc(option) + '</option>'
+  ).join('') + '</select>';
+}
+function recordField(field,record) {
+  const title=esc(field.name)+(field.required?' <span class="wh-required" aria-hidden="true">*</span>':'');
+  if(field.type==='upload')return '<div class="wh-form-field"><span>'+title+'</span>'+fieldControl(field,record)+'</div>';
+  return '<label class="wh-form-field"><span>'+title+'</span>'+fieldControl(field,record)+'</label>';
+}
+function lineRow(line,lineFields){
+  return '<tr data-line-row="'+esc(line.lineId)+'">'+lineFields.map(field=>{
+    // Unticked fields keep their saved values editable, but new lines don't get an input for them.
+    const editable=field.multi||!isEmptyValue(line[field.id]);
+    return '<td>'+(editable?fieldControl(field,line,'line:'+line.lineId+':'+field.id,field.multi&&field.required):'<span class="wh-muted">—</span>')+'</td>';
+  }).join('')+'<td class="wh-line-remove"><button type="button" class="wh-icon-btn wh-icon-btn-danger" data-remove-line aria-label="이 줄 삭제" title="이 줄 삭제">'+icon('trash',14)+'</button></td></tr>';
+}
+function lineSummary(line,lineFields){
+  return lineFields.map(field=>fieldText(field,line)).filter(text=>text!=='—').join(' · ')||'빈 줄';
+}
+function recordForm(id){
+  const original=id?board().records.find(record=>record.id===id&&!record.deleted):null;
+  if(id&&!original)return;
+  if(!activeFields().length){tab='schema';schemaEditing=true;render();return;}
+  const originalLines=original?visibleLines(original):[{lineId:newLineId()}];
+  const source={lines:originalLines};
+  const lineFields=activeFields().filter(field=>spansLines(source,field)),gridFields=activeFields().filter(field=>!spansLines(source,field));
+  const canAddLines=lineFields.some(field=>field.multi);
+  const title=id?'#'+id+' 수정':'새 내역 작성';
+  const grid=gridFields.length?'<div class="wh-form-grid">'+gridFields.map(field=>recordField(field,originalLines[0])).join('')+'</div>':'';
+  const editor=lineFields.length?'<div class="wh-lines-block"><div class="wh-table-wrap"><table class="wh-table wh-line-table" aria-label="줄별 입력"><thead><tr>'+lineFields.map(field=>'<th scope="col">'+esc(field.name)+(field.multi&&field.required?' <span class="wh-required" aria-hidden="true">*</span>':'')+'</th>').join('')+'<th scope="col"><span class="wh-sr">줄 삭제</span></th></tr></thead><tbody id="wh-line-rows">'+originalLines.map(line=>lineRow(line,lineFields)).join('')+'</tbody></table></div>'+(canAddLines?'<button type="button" class="wh-btn wh-btn-sm wh-line-add" data-add-line>'+icon('plus',13)+'줄 추가</button>':'')+'</div>':'';
+  const dialog=openDialog('<form id="wh-record-form">'+dialogHead(title)+'<div class="wh-dialog-body">'+grid+editor+'</div><div class="wh-dialog-foot"><span class="wh-spacer"></span><button type="button" class="wh-btn" data-dialog-cancel>취소</button><button type="submit" class="wh-btn wh-btn-primary">저장</button></div></form>',{label:title,wide:lineFields.length>2});
+  const form=dialog.querySelector('form');
+  bindUploadControls(form);
+  const rowsBody=form.querySelector('#wh-line-rows');
+  function syncLineButtons(){
+    if(!rowsBody)return;
+    const buttons=rowsBody.querySelectorAll('[data-remove-line]');
+    buttons.forEach(button=>{button.disabled=buttons.length===1;});
+  }
+  syncLineButtons();
+  rowsBody?.addEventListener('click',event=>{
+    const button=event.target.closest('[data-remove-line]');
+    if(!button||button.disabled)return;
+    button.closest('tr').remove();syncLineButtons();
+  });
+  form.querySelector('[data-add-line]')?.addEventListener('click',()=>{
+    rowsBody.insertAdjacentHTML('beforeend',lineRow({lineId:newLineId()},lineFields));
+    bindUploadControls(form);syncLineButtons();
+    rowsBody.lastElementChild.querySelector('input:not([type=hidden]),select')?.focus();
+  });
+  const entries=()=>[...new FormData(form).entries()].filter(([,value])=>typeof value==='string');
+  const snapshot=()=>JSON.stringify(entries());
+  const initial=snapshot();
+  async function attemptClose(){
+    if(snapshot()!==initial&&!await confirmDialog({title:'작성 중인 내용을 버릴까요?',body:'저장하지 않은 내용은 사라집니다.',confirmLabel:'버리기',danger:true}))return;
+    closeDialog(dialog);
+  }
+  dialog.querySelector('[data-dialog-x]').onclick=dialog.querySelector('[data-dialog-cancel]').onclick=attemptClose;
+  dialog.addEventListener('cancel',event=>{event.preventDefault();attemptClose()});
+  form.onsubmit=event=>{
+    event.preventDefault();if(!validateUploads(form))return;
+    const gridValues={},lineValues={};
+    entries().forEach(([key,value])=>{
+      if(!key.startsWith('line:')){gridValues[key]=value;return;}
+      const [,lineId,fieldId]=key.split(':');
+      (lineValues[lineId]||={})[fieldId]=value;
+    });
+    const byId=Object.fromEntries(originalLines.map(line=>[line.lineId,line]));
+    const rowIds=rowsBody?[...rowsBody.querySelectorAll('[data-line-row]')].map(row=>row.dataset.lineRow):[originalLines[0].lineId];
+    let next=rowIds.map(lineId=>({...(byId[lineId]||{lineId}),...lineValues[lineId]}));
+    // A line added but left blank is not a line.
+    const filled=next.filter(line=>byId[line.lineId]||Object.values(lineValues[line.lineId]||{}).some(value=>value!==''));
+    if(filled.length)next=filled;
+    const first=next[0],oldFirst=originalLines[0];
+    if(oldFirst.lineId!==first.lineId){
+      Object.keys(oldFirst).filter(key=>!['lineId','deleted','deletedAt'].includes(key)&&!lineFields.some(field=>field.id===key)&&!(key in first)).forEach(key=>{first[key]=oldFirst[key];});
+    }
+    Object.assign(first,gridValues);
+    const removed=originalLines.filter(line=>!next.some(item=>item.lineId===line.lineId));
+    const hiddenBefore=original?original.lines.filter(line=>line.deleted):[];
+    const lines=[...next,...removed.map(line=>({...line,deleted:true,deletedAt:now()})),...hiddenBefore];
+    const newId=id||Math.max(0,...board().records.map(record=>record.id))+1;
+    let message='저장했습니다.';
+    if(id){
+      const changes=[];
+      gridFields.forEach(field=>{
+        if(String(oldFirst[field.id]??'')!==String(first[field.id]??''))changes.push(field.name+': '+fieldText(field,oldFirst)+' → '+fieldText(field,first));
+      });
+      next.forEach((line,i)=>{
+        const before=byId[line.lineId];
+        if(!before){changes.push('줄 추가: '+lineSummary(line,lineFields));return;}
+        lineFields.forEach(field=>{
+          if(String(before[field.id]??'')!==String(line[field.id]??''))changes.push((i+1)+'번째 줄 '+field.name+': '+fieldText(field,before)+' → '+fieldText(field,line));
+        });
+      });
+      removed.forEach(line=>changes.push('줄 삭제: '+lineSummary(line,lineFields)));
+      if(changes.length){original.lines=lines;log('#'+id+' 수정',changes.join(' / '));}
+      else message='변경 사항이 없습니다.';
+    }else{
+      board().records.unshift({id:newId,createdAt:now(),lines});
+      log('#'+newId+' 등록',next.length>1?'내역 등록 · '+next.length+'줄':'내역 등록');
+    }
+    closeDialog(dialog);save();render();toast(message);
+  };
+}
+function bindUploadControls(form) {
+  form.querySelectorAll('[data-upload-field]').forEach(container => {
+    const value = container.querySelector('input[type="hidden"]');
+    const name = container.querySelector('.wh-upload-name');
+    const choose = container.querySelector('[data-choose-file]');
+    const open = container.querySelector('[data-open-file]');
+    const fallback = container.querySelector('[data-file-fallback]');
+    async function remember(file,handle) {
+      if (!file) return;
+      container.dataset.uploadBusy='true'; choose.disabled=true;
+      try {
+        const stored = await window.workhubFiles.remember(file,handle);
+        value.value=stored;name.textContent=file.name;open.hidden=false;
+      } catch(error) { toast(error.message || '파일 정보를 저장하지 못했습니다.','error'); }
+      finally { delete container.dataset.uploadBusy; choose.disabled=false; fallback.value=''; }
+    }
+    choose.onclick = async () => {
+      if(typeof window.showOpenFilePicker==='function') {
+        try { const [handle]=await window.showOpenFilePicker({multiple:false}); await remember(await handle.getFile(),handle); }
+        catch(error) {
+          if(error.name==='AbortError') return;
+          if(error.name==='SecurityError' || error.name==='NotAllowedError') fallback.click();
+          else toast(error.message || '파일 선택을 완료하지 못했습니다.','error');
+        }
+      } else fallback.click();
+    };
+    fallback.onchange=()=>remember(fallback.files[0]);
+    open.onclick=async()=>{try{toast(await window.workhubFiles.open(value.value));}catch(error){toast(error.message || '파일을 열지 못했습니다.','error');}};
+  });
+}
+function validateUploads(form) {
+  if(form.querySelector('[data-upload-busy="true"]')) { toast('파일 연결이 끝난 후 저장해 주세요.','error');return false; }
+  for(const container of form.querySelectorAll('[data-upload-required]')) {
+    if(!window.workhubFiles.parse(container.querySelector('input[type="hidden"]').value)) {
+      toast(container.dataset.uploadName+': 파일을 선택해 주세요.','error');
+      container.querySelector('[data-choose-file]').focus();
+      return false;
+    }
+  }
+  return true;
+}
+
+/* Form settings */
+const typeName=type=>({date:'날짜',number:'숫자',text:'텍스트',select:'드롭다운',upload:'업로드'}[type]||type);
+// With 줄마다 on, the preview always shows two lines so the merged layout is visible.
+function previewRecord(fields){
+  const latest=visibleRecords().reduce((latest,record)=>!latest || record.id>latest.id?record:latest,null)||{id:null,lines:[{lineId:'preview-1'}]};
+  if(!fields.some(field=>field.multi)||visibleLines(latest).length>1)return latest;
+  const sample=(field,n)=>({number:String(n*1000),text:'예시 '+n,select:field.options?.[n-1]||'',date:now().slice(0,10).replace(/\./g,'-')}[field.type]||'');
+  const first={...visibleLines(latest)[0]},second={lineId:'preview-2'};
+  fields.filter(field=>field.multi).forEach(field=>{
+    if(isEmptyValue(first[field.id]))first[field.id]=sample(field,1);
+    second[field.id]=sample(field,2);
+  });
+  return {...latest,lines:[first,second]};
+}
+function previewTable(fields){
+  return '<table class="wh-table" aria-label="입력 양식 미리보기"><thead><tr><th scope="col">등록 번호</th>'+fields.map(field=>'<th scope="col"'+(field.type==='number'?' class="wh-num"':'')+'>'+esc(field.name||'항목 이름')+'</th>').join('')+'</tr></thead>'+recordBody(previewRecord(fields),fields,false)+'</table>';
+}
+function schemaView(){
+  const fields=activeFields();
+  $('#wh-page-actions').innerHTML='<button type="button" class="wh-btn wh-btn-primary" id="wh-schema-edit">수정</button>';
+  $('#wh-schema-edit').onclick=()=>{schemaEditing=true;schemaDraft=null;render()};
+  panel.innerHTML='<section class="wh-section" aria-labelledby="wh-preview-title"><div class="wh-section-head"><div><h3 id="wh-preview-title">미리보기</h3><p>현재 열 구성과 가장 최근 내역입니다.</p></div></div><div class="wh-table-wrap">'+previewTable(fields)+'</div></section><section class="wh-section"><div class="wh-section-head"><h3>입력 항목</h3></div><div class="wh-table-wrap"><table class="wh-table" aria-label="양식 설정"><thead><tr><th scope="col">항목 이름</th><th scope="col">입력 유형</th><th scope="col">필수</th><th scope="col">줄마다</th></tr></thead><tbody>'+(fields.length?fields.map(field=>'<tr><td>'+esc(field.name)+'</td><td>'+typeName(field.type)+'</td><td>'+(field.required?'필수':'<span class="wh-muted">—</span>')+'</td><td>'+(field.multi?'줄마다':'<span class="wh-muted">—</span>')+'</td></tr>').join(''):'<tr><td colspan="4" class="wh-empty-cell">아직 입력 항목이 없습니다.</td></tr>')+'</tbody></table></div></section>';
+}
+function schema() {
+  panel.innerHTML = `<section class="wh-section" aria-labelledby="wh-preview-title"><div class="wh-section-head"><div><h3 id="wh-preview-title">미리보기</h3><p>저장 전 변경 내용이 바로 반영됩니다.</p></div></div><div id="wh-preview-row" class="wh-table-wrap"></div></section>
+    <form id="wh-schema" class="wh-section" novalidate><div class="wh-section-head"><h3>양식 정보</h3></div><div class="wh-form-grid wh-board-fields"><label class="wh-form-field"><span>양식 이름 <span class="wh-required" aria-hidden="true">*</span></span><input class="wh-input" id="wh-board-name" maxlength="40" value="${esc(boardDraft?.name??board().name)}"></label><label class="wh-form-field"><span>설명</span><input class="wh-input" id="wh-board-desc" value="${esc(boardDraft?.desc??board().desc)}"></label></div><div class="wh-section-head"><div><h3>입력 항목 <span id="wh-field-count" class="wh-hint"></span></h3><p>삭제한 항목은 숨겨지며, 기존 내역의 값은 보존됩니다. 줄마다를 끄면 새 내역부터 적용되고, 이미 입력한 여러 줄은 그대로 표시됩니다.</p></div></div>
+    <div class="wh-schema-fields"><div class="wh-fields-header" aria-hidden="true"><span>항목 이름</span><span>입력 유형</span><span class="wh-column-center">필수</span><span class="wh-column-center">줄마다</span><span class="wh-column-center">순서</span><span class="wh-column-center">관리</span></div><div id="wh-field-list"></div></div>
+    <div class="wh-actionbar"><button type="button" class="wh-btn" id="wh-field-add">${icon('plus',14)}항목 추가</button><div class="wh-actionbar-right"><p id="wh-schema-error" class="wh-error" role="alert"></p><button type="button" class="wh-btn" id="wh-schema-cancel">취소</button><button type="submit" class="wh-btn wh-btn-primary">저장</button></div></div></form>`;
+  const error=text=>{$('#wh-schema-error').textContent=text;};
+  if(!schemaDraft){
+    schemaDraft=activeFields().map(f=>({...f,options:[...(f.options||[])]}));
+    boardDraft={name:board().name,desc:board().desc};
+    $('#wh-board-name').value=boardDraft.name;$('#wh-board-desc').value=boardDraft.desc;
+  }
+  $('#wh-board-name').oninput=e=>{boardDraft.name=e.target.value;e.target.removeAttribute('aria-invalid');error('');};
+  $('#wh-board-desc').oninput=e=>{boardDraft.desc=e.target.value;};
+  const draft=schemaDraft;
+  function drawPreview() {
+    $('#wh-field-count').textContent = draft.length + '개';
+    $('#wh-preview-row').innerHTML=previewTable(draft);
+  }
+  function drawFields() {
+    $('#wh-field-list').innerHTML = draft.length ? draft.map((f,i) => {
+      const options = ['date','number','text','select','upload'];
+      return `<section class="wh-field-editor"><div class="wh-field-row">
+        <input class="wh-input" aria-label="항목 이름" data-field="${i}" value="${esc(f.name)}">
+        <select class="wh-input" aria-label="입력 유형" data-type="${i}">${options.map(type=>'<option value="'+type+'">'+typeName(type)+'</option>').join('')}</select>
+        <div class="wh-column-center"><input aria-label="필수 입력 여부" type="checkbox" data-required="${i}" ${f.required?'checked':''}></div>
+        <div class="wh-column-center"><input aria-label="줄마다 입력 여부" type="checkbox" data-multi="${i}" ${f.multi?'checked':''}></div>
+        <div class="wh-order"><button type="button" class="wh-icon-btn" data-up="${i}" ${i===0?'disabled':''} aria-label="항목 위로">${icon('up',14)}</button><button type="button" class="wh-icon-btn" data-down="${i}" ${i===draft.length-1?'disabled':''} aria-label="항목 아래로">${icon('down',14)}</button></div>
+        <div class="wh-column-center"><button type="button" class="wh-icon-btn wh-icon-btn-danger" data-remove-field="${i}" aria-label="${esc(f.name)} 항목 삭제" title="항목 삭제">${icon('trash',14)}</button></div></div>
+        ${f.type==='select'?`<div class="wh-options"><div class="wh-options-head"><span>선택 항목</span><span>${f.options.length}개</span></div>
+        ${f.options.map((option,j)=>`<div class="wh-option-row"><input class="wh-input" aria-label="선택 항목 ${j+1}" data-option-field="${i}" data-option-index="${j}" value="${esc(option)}" placeholder="선택 항목 이름"><button type="button" class="wh-icon-btn wh-icon-btn-danger" style="height:36px;width:36px" data-remove-option="${i}" data-option-index="${j}" aria-label="선택 항목 ${j+1} 삭제">${icon('trash',14)}</button></div>`).join('')}
+        <button type="button" class="wh-btn wh-btn-sm" data-add-option="${i}">${icon('plus',13)}선택 항목 추가</button></div>`:''}</section>`;
+    }).join('') : '<p class="wh-empty-note">아직 항목이 없습니다. 아래 ‘항목 추가’로 시작해 주세요.</p>';
+    draft.forEach((f,i) => {
+      $(`[data-type="${i}"]`).value = f.type;
+      $(`[data-field="${i}"]`).oninput = e => { f.name = e.target.value; e.target.removeAttribute('aria-invalid'); error(''); drawPreview(); };
+      $(`[data-type="${i}"]`).onchange = e => {
+        f.type = e.target.value;
+        if (f.type === 'select' && !f.options.length) {
+          f.options = [...new Set(visibleRecords().flatMap(r=>fieldValues(r,f)).map(String))];
+          if (!f.options.length) f.options = ['선택 항목 1', '선택 항목 2'];
+        }
+        error(''); drawFields();
+      };
+      $(`[data-required="${i}"]`).onchange = e => { f.required = e.target.checked; drawPreview(); };
+      $(`[data-multi="${i}"]`).onchange = e => { f.multi = e.target.checked; drawPreview(); };
+      $(`[data-remove-field="${i}"]`).onclick=()=>{draft.splice(i,1);error('');drawFields();};
+      $(`[data-up="${i}"]`).onclick = () => { [draft[i-1],draft[i]]=[draft[i],draft[i-1]]; drawFields(); };
+      $(`[data-down="${i}"]`).onclick = () => { [draft[i],draft[i+1]]=[draft[i+1],draft[i]]; drawFields(); };
+      if (f.type === 'select') {
+        $(`[data-add-option="${i}"]`).onclick = () => {
+          f.options.push(''); error(''); drawFields();
+          $(`[data-option-field="${i}"][data-option-index="${f.options.length-1}"]`).focus();
+        };
+      }
+    });
+    root.querySelectorAll('[data-option-field]').forEach(input => {
+      input.oninput = e => { draft[Number(input.dataset.optionField)].options[Number(input.dataset.optionIndex)] = e.target.value; e.target.removeAttribute('aria-invalid'); error(''); drawPreview(); };
+    });
+    root.querySelectorAll('[data-remove-option]').forEach(button => {
+      button.onclick = () => { draft[Number(button.dataset.removeOption)].options.splice(Number(button.dataset.optionIndex),1); error(''); drawFields(); };
+    });
+    drawPreview();
+  }
+  drawFields();
+  $('#wh-field-add').onclick = () => {
+    draft.push({id:'custom'+Date.now()+'_'+draft.length,name:'새 항목',type:'text',required:false,options:[]});
+    drawFields();
+    const input=$(`[data-field="${draft.length-1}"]`);input.focus();input.select();
+  };
+  $('#wh-schema-cancel').onclick=async()=>{if(await leaveSchema())render();};
+  $('#wh-schema').onsubmit=event=>{
+    event.preventDefault();
+    const changed=schemaChanged();
+    if(!commitSchemaDraft())return;
+    schemaEditing=false;save();render();toast(changed?'저장했습니다.':'변경 사항이 없습니다.');
+  };
+}
+function commitSchemaDraft(){
+  if(!schemaDraft)return true;
+  const next=schemaDraft.map(field=>({...field,active:true,name:field.name.trim(),options:field.type==='select'?field.options.map(option=>option.trim()):[]}));
+  function invalid(message,selector){
+    $('#wh-schema-error').textContent=message;
+    const input=$(selector);
+    if(input){input.setAttribute('aria-invalid','true');input.focus();}
+    return false;
+  }
+  const nextName=boardDraft.name.trim(),nextDesc=boardDraft.desc.trim();
+  if(!nextName)return invalid('양식 이름을 입력해 주세요.','#wh-board-name');
+  if(state.boards.some(item=>item!==board()&&item.name===nextName))return invalid('같은 이름의 업무 양식이 있습니다.','#wh-board-name');
+  const blank=next.findIndex(field=>!field.name);
+  if(blank>=0)return invalid('항목 이름을 입력해 주세요.',`[data-field="${blank}"]`);
+  const duplicate=next.findIndex((field,i)=>next.findIndex(item=>item.name===field.name)!==i);
+  if(duplicate>=0)return invalid('항목 이름은 중복될 수 없습니다.',`[data-field="${duplicate}"]`);
+  for(const [i,field] of next.entries()){
+    if(field.type!=='select')continue;
+    if(!field.options.length)return invalid(field.name+': 선택 항목을 입력해 주세요.',`[data-add-option="${i}"]`);
+    const empty=field.options.findIndex(option=>!option);
+    if(empty>=0)return invalid(field.name+': 선택 항목을 입력해 주세요.',`[data-option-field="${i}"][data-option-index="${empty}"]`);
+    const repeated=field.options.findIndex((option,j)=>field.options.indexOf(option)!==j);
+    if(repeated>=0)return invalid(field.name+': 선택 항목 이름은 중복될 수 없습니다.',`[data-option-field="${i}"][data-option-index="${repeated}"]`);
+  }
+  if(board().name!==nextName){log('양식 이름 변경',board().name+' → '+nextName);board().name=nextName;}
+  if(board().desc!==nextDesc){log('양식 설명 변경',(board().desc||'—')+' → '+(nextDesc||'—'));board().desc=nextDesc;}
+  const old=board().fields;
+  if(comparableFields(old.filter(field=>field.active!==false))!==comparableFields(next)){
+    const changes=next.map(field=>{
+      const prior=old.find(item=>item.id===field.id);
+      if(!prior)return '항목 추가: '+field.name;
+      if(comparableFields([prior])===comparableFields([field]))return null;
+      if(prior.name!==field.name)return '항목 이름 변경: '+prior.name+' → '+field.name;
+      return !!prior.multi!==!!field.multi?'줄마다 '+(field.multi?'켬':'끔')+': '+field.name:'항목 설정 변경: '+field.name;
+    }).filter(Boolean);
+    changes.push(...old.filter(field=>field.active!==false && !next.some(item=>item.id===field.id)).map(field=>'항목 제거: '+field.name));
+    if(!changes.length)changes.push('항목 순서 변경');
+    board().fields=[...next,...old.filter(field=>!next.some(item=>item.id===field.id)).map(field=>({...field,active:false}))];
+    log('양식 변경',changes.join(' / '));
+  }
+  const active=activeFields();
+  columnFilters=Object.fromEntries(Object.entries(columnFilters).filter(([id])=>active.some(field=>field.id===id && field.type==='select')));
+  if(columnSort.id!=='id'&&!active.some(field=>field.id===columnSort.id&&field.type!=='select'))columnSort={id:'id',direction:'desc'};
+  schemaDraft=null;
+  return true;
+}
+
+function history(){panel.innerHTML=board().history.length?board().history.map(h=>`<article class="wh-event"><div class="wh-event-meta">${esc(h.time.replace(/-/g,'.'))}<br>${esc(h.who)}</div><div><h3>${esc(h.title)}</h3><p>${esc(h.detail)}</p></div></article>`).join(''):'<p class="wh-empty-note">아직 변경 기록이 없습니다.</p>';}
+
+function resetListState(){query='';columnSort={id:'id',direction:'desc'};columnFilters={};dateRange={preset:'all',from:'',to:''};idDisplay='id';}
+$('#wh-new-board').onclick=async()=>{
+  if(!await leaveSchema())return;
+  render();
+  const dialog=openDialog('<form id="wh-create">'+dialogHead('새 업무 양식 만들기')+'<div class="wh-dialog-body"><div class="wh-form-grid"><label class="wh-form-field"><span>양식 이름 <span class="wh-required" aria-hidden="true">*</span></span><input class="wh-input" name="name" placeholder="예: 출장비 정산" required maxlength="40"></label><label class="wh-form-field"><span>설명</span><input class="wh-input" name="desc" placeholder="관리할 업무를 간단히 적어 주세요."></label></div></div><div class="wh-dialog-foot"><span class="wh-spacer"></span><button type="button" class="wh-btn" data-dialog-cancel>취소</button><button type="submit" class="wh-btn wh-btn-primary">만들고 항목 설정</button></div></form>',{label:'새 업무 양식 만들기'});
+  dialog.querySelector('[data-dialog-x]').onclick=dialog.querySelector('[data-dialog-cancel]').onclick=()=>closeDialog(dialog);
+  dialog.querySelector('form').onsubmit=e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),name=f.get('name').trim();
+    if(!name){e.target.elements.name.focus();return;}
+    if(state.boards.some(b=>b.name===name)){toast('같은 이름의 업무 양식이 있습니다.','error');e.target.elements.name.focus();return;}
+    state.boards.push({name,desc:f.get('desc')||'새로운 업무 양식입니다.',fields:[],records:[],history:[]});
+    state.board=state.boards.length-1;tab='schema';schemaEditing=true;schemaDraft=null;resetListState();
+    log('양식 생성',name);closeDialog(dialog);save();render();
+  };
+};
+root.addEventListener('click',async e=>{
+  const closest=selector=>e.target.closest(selector);
+  const attachment=closest('[data-open-attachment]');
+  if(attachment){e.preventDefault();window.workhubFiles.open(attachment.dataset.openAttachment).then(message=>toast(message)).catch(error=>toast(error.message,'error'));return;}
+  const toggleId=closest('[data-toggle-id]');
+  if(toggleId){
+    idDisplay=idDisplay==='date'?'id':'date';
+    dataRows();
+    $('[data-toggle-id="'+toggleId.dataset.toggleId+'"]')?.focus();
+    return;
+  }
+  const record=closest('[data-record]'),edit=closest('[data-edit-record]'),remove=closest('[data-delete-record]');
+  if(record){
+    // Dragging across a value to copy it should not open the pop-up.
+    if(!window.getSelection().isCollapsed)return;
+    recordView(Number(record.dataset.record));
+    return;
+  }
+  if(edit){recordForm(Number(edit.dataset.editRecord));return;}
+  if(remove){deleteRecord(Number(remove.dataset.deleteRecord));return;}
+  if(closest('[data-add-record]')){recordForm(null);return;}
+  if(closest('[data-reset-filters]')){query='';columnFilters={};dateRange={preset:'all',from:'',to:''};render();return;}
+  if(closest('[data-go-schema]')){tab='schema';schemaEditing=true;schemaDraft=null;render();save();return;}
+  const boardButton=closest('[data-board]'),tabButton=closest('[data-tab]');
+  if(boardButton){
+    const next=Number(boardButton.dataset.board);
+    if(!await leaveSchema())return;
+    state.board=next;resetListState();tab='list';render();save();
+    return;
+  }
+  if(tabButton){
+    const next=tabButton.dataset.tab;
+    if(next===tab)return;
+    if(!await leaveSchema())return;
+    tab=next;render();save();
+  }
+});
+root.addEventListener('keydown',e=>{
+  const value=e.target.closest?.('.wh-value');
+  if(value&&(e.key==='Enter'||e.key===' ')){e.preventDefault();recordView(Number(value.dataset.record));}
+});
+window.addEventListener('openai:set_globals',e=>{if(e.detail?.globals?.widgetState){hydrate(e.detail.globals.widgetState);render()}});
+render();
+if(globalThis.Tweak){const appearance={density:'편안하게'};const tweak=new Tweak({container:root,onChange:()=>root.style.setProperty('--wh-cell',appearance.density==='촘촘하게'?'9px':'13px')});tweak.addSelect(appearance,'density',{label:'표 간격',options:['편안하게','촘촘하게']});}
+})();
+
+// Developer notes layer. Only reads the page and adds pins, so removing this file removes every note.
+// 화면만 봐서는 알 수 없는 동작과 데이터 규칙만 적습니다.
+// 개발자가 읽는 글입니다. 간결하게 쓰되 AND, OR, deletedAt 같은 기술 용어는 그대로 씁니다.
+// must: 요구사항 / example: 데이터 예시 / now: 현재 동작 / ask: 개발 시 필요
+(() => {
+const pinSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none"><defs><filter id="comment-icon-shadow" x="0" y="0" width="96" height="96" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#141e19" flood-opacity="0.18"/></filter></defs><circle cx="48" cy="46" r="32" fill="#ffffff" filter="url(#comment-icon-shadow)"/><g transform="translate(30 28) scale(1.5)" stroke="#1d2822" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></g></svg>`;
+const pinSrc = 'data:image/svg+xml,' + encodeURIComponent(pinSvg);
+
+const notes = [
+  /* 데이터 목록 */
+  { screen: '데이터 목록', anchor: '[data-sort-head="id"]', title: '저장 구조', must: [
+    '내역 = 등록 번호 1개 + 줄 1개 이상. 한 줄짜리 내역도 lines에 1개로 저장합니다.',
+    '항목 값은 모두 줄에 저장합니다. 내역에 직접 저장하지 않습니다.',
+    'lineId는 내부 값이며 화면에 표시하지 않습니다.',
+    '값을 단일 값과 여러 줄 값으로 나눠 이중 저장하지 않습니다.',
+  ], example: `#1026
+ ├ lineId a1: 항목 = 밥,   금액 = 5000
+ └ lineId a2: 항목 = 커피, 금액 = 2000
+
+#1027
+ └ lineId b1: 항목 = 택시, 금액 = 12000`, now: [
+    '구조: 양식(fields, records, history) → 내역(id, createdAt, deleted, deletedAt, lines) → 줄(lineId, deleted, deletedAt, 항목별 값).',
+    'id는 max(id) + 1이며, deleted 내역도 포함해 계산하므로 번호를 재사용하지 않습니다.',
+    '이전 형식의 내역은 로드 시 자동 변환합니다. 기존 값은 1번째 줄이 되고 옛 items 원본은 유지합니다.',
+  ], ask: [
+    '번호는 서버에서 발급해 주세요. 동시 등록 시 중복되면 안 됩니다.',
+    '현재 저장소는 localStorage(내역), IndexedDB(첨부파일)입니다. 서버 DB로 교체가 필요합니다.',
+  ] },
+  { screen: '데이터 목록', anchor: '#wh-table [data-toggle-id]', title: '등록 번호·등록일 전환', must: [
+    '등록일은 별도 열이 없습니다. 등록 번호 값을 누르면 모든 행이 createdAt 표시로 바뀌고, 다시 누르면 돌아옵니다.',
+    '열 제목은 항상 "등록 번호"입니다.',
+    'createdAt은 최초 저장 시각이며 입력·수정할 수 없습니다. 내역을 수정해도 바뀌지 않습니다.',
+  ], now: [
+    '날짜 표시 중에는 이 열의 정렬 기준이 createdAt입니다.',
+    '표시 상태는 저장하지 않습니다. 새로고침하거나 양식을 바꾸면 등록 번호로 돌아옵니다.',
+    '기존 내역의 createdAt은 "#번호 등록" 이력 시각을 사용하고, 이력이 없으면 null(— 표시)입니다.',
+    '카드 사용 내역 #1020~1023의 createdAt은 임의의 예시 값입니다.',
+  ], ask: [
+    'createdAt은 브라우저가 아니라 서버 시각으로 기록해 주세요.',
+  ] },
+  { screen: '데이터 목록', anchor: '[data-sort-head]:not([data-sort-head="id"])', title: '열 정렬', now: [
+    '빈 값은 정렬 방향과 무관하게 항상 뒤로 보냅니다.',
+    '값이 같으면 id 오름차순입니다.',
+    '줄마다 항목은 첫 번째 값 기준으로 정렬합니다. 내역은 줄 단위로 나뉘지 않습니다.',
+  ] },
+  { screen: '데이터 목록', anchor: '#wh-table thead th:has([data-filter-field])', title: '드롭다운 필터', now: [
+    '같은 열 안의 선택값은 OR, 서로 다른 열 사이는 AND입니다.',
+    '여러 줄 내역은 줄 중 하나만 맞아도 내역 전체를 표시합니다.',
+    '선택 목록 = field.options + 실제 저장된 값.',
+    '모두 체크한 상태는 필터 없음(null)으로 처리합니다.',
+  ] },
+  { screen: '데이터 목록', anchor: '#wh-table [data-delete-record]', title: '내역 삭제', must: [
+    'Soft delete만 허용합니다. 값과 lines를 모두 보존하고, 이력을 남깁니다.',
+  ], now: [
+    'deleted = true, deletedAt = 삭제 시각을 기록합니다.',
+    'deleted 내역은 목록, 건수, 합계, 검색, 필터에서 제외합니다.',
+  ] },
+
+  /* 내역 작성·수정 */
+  { screen: '내역 작성·수정', anchor: '#wh-record-form .wh-form-grid', title: '입력값 보존', now: [
+    'options에서 삭제된 값도 "(이전 값)"으로 선택지에 남겨 저장값을 유지합니다.',
+    '숨긴 항목(active: false)의 값은 입력칸이 없어도 저장 시 유지합니다.',
+  ] },
+  { screen: '내역 작성·수정', anchor: '.wh-line-table', title: '줄별 입력', must: [
+    '줄마다를 꺼도 기존 내역의 줄은 모두 표시하고 수정·삭제할 수 있어야 합니다.',
+  ], now: [
+    '꺼진 항목은 값이 있는 줄에만 입력칸을 표시합니다.',
+  ] },
+  { screen: '내역 작성·수정', anchor: '[data-add-line]', title: '줄 추가', must: [
+    'field.multi가 true인 항목이 있을 때만 표시합니다.',
+  ], now: [
+    '새 줄의 값이 모두 비어 있으면 저장하지 않습니다.',
+  ] },
+  { screen: '내역 작성·수정', anchor: '[data-remove-line]', title: '줄 삭제', must: [
+    'Soft delete입니다. 줄에 deleted, deletedAt을 기록하고 값을 보존하며 이력을 남깁니다.',
+  ], now: [
+    '내역에는 최소 1줄이 필요합니다.',
+    '1번째 줄을 삭제하면 단일 입력 항목의 값은 다음 줄로 옮깁니다. 삭제된 줄에도 원래 값은 남습니다.',
+  ] },
+  { screen: '내역 작성·수정', anchor: '.wh-upload', title: '첨부파일', now: [
+    '지원 브라우저는 FileSystemFileHandle을, 그 외에는 File 사본을 IndexedDB에 저장합니다. 서버 전송은 없습니다.',
+    '파일을 옮기거나 지우면 다시 선택해야 하며, 읽기 권한을 다시 요청할 수 있습니다.',
+    'PDF, text/plain, 이미지는 새 탭으로 열고 나머지는 다운로드합니다.',
+  ], ask: [
+    '서버 업로드와 저장소, 용량·형식 제한, 접근 권한이 필요합니다.',
+  ] },
+  { screen: '내역 작성·수정', anchor: '#wh-record-form [type="submit"]', title: '저장과 이력', now: [
+    '변경이 없으면 이력을 남기지 않습니다.',
+    '바뀐 값만 기록합니다. 예: "메모: 이전 → 이후", "2번째 줄 금액(원): 2,000 → 2,500", "줄 추가: 커피 · 2,000".',
+  ] },
+  { screen: '내역 작성·수정', anchor: '#wh-record-form [data-dialog-cancel]', title: '작성 내용 보호', must: [
+    '작성 중인 내용을 확인 없이 잃으면 안 됩니다.',
+  ], now: [
+    '변경이 있으면 취소, X, Esc 모두 확인 창을 띄웁니다. 대화 상자 바깥 클릭으로는 닫히지 않습니다.',
+  ] },
+
+  /* 양식 설정 */
+  { screen: '양식 설정 편집', anchor: '[data-field="0"]', title: '항목 이름', now: [
+    '값은 field.id로 연결되므로 이름을 바꿔도 기존 값이 유지됩니다.',
+    '양식 안에서 중복될 수 없고, 앞뒤 공백은 제거합니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '[data-type="0"]', title: '입력 유형 변경', now: [
+    '유형을 바꿔도 저장된 값은 변환하거나 지우지 않습니다.',
+    '드롭다운으로 바꾸면 저장된 값으로 options를 자동 생성합니다. 값이 없으면 "선택 항목 1, 2"로 시작합니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '[data-required="0"]', title: '필수 적용 범위', now: [
+    '저장된 내역에는 소급 적용하지 않습니다.',
+    'multi 항목은 줄마다 필수이며, multi를 끈 항목의 기존 줄에는 적용하지 않습니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '[data-multi="0"]', title: '줄마다', must: [
+    'field.multi는 입력 화면만 결정합니다. 저장 데이터는 변환하지 않습니다.',
+    '언제든 켜고 끌 수 있으며 막지 않습니다. 저장 시점부터 적용합니다.',
+    '표는 저장된 줄을 그대로 표시합니다. 꺼도 기존의 여러 줄은 그대로 보이고, 새 내역은 입력칸 1개입니다.',
+  ], now: [
+    '꺼진 항목이라도 2번째 줄 이후에 값이 있으면 병합하지 않고 줄별로 표시합니다.',
+    '저장 구조가 항상 같아서 몇 번을 전환해도 데이터가 손실되지 않습니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '[data-remove-field="0"]', title: '항목 삭제', must: [
+    'Soft delete입니다. active: false로 숨기고 내역의 값은 보존하며 이력을 남깁니다.',
+  ], now: [
+    '숨긴 항목의 값은 표, 폼, 검색에서 제외합니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '.wh-options', title: '선택 항목 삭제', now: [
+    'options에서 지워도 내역에 저장된 값은 유지합니다.',
+    '빈 값과 중복은 저장할 수 없습니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '#wh-schema [type="submit"]', title: '설정 저장과 이력', now: [
+    '실제 변경만 기록합니다: 항목 추가, 항목 제거, 항목 이름 변경, 줄마다 켬·끔, 항목 설정 변경, 항목 순서 변경, 양식 이름·설명 변경.',
+    '저장 시 사라진 항목의 필터와 정렬은 초기화합니다.',
+  ] },
+  { screen: '양식 설정 편집', anchor: '#wh-schema-cancel', title: '설정 변경 보호', now: [
+    '변경이 있으면 취소, 탭 이동, 양식 이동 시 확인 창을 띄웁니다.',
+  ] },
+
+  /* 변경 이력 */
+  { screen: '변경 이력', anchor: '.wh-event', title: '변경 이력', must: [
+    '이력은 영구 보존합니다. 수정·삭제 기능을 만들지 않습니다.',
+    '내역이나 항목을 숨겨도 관련 이력은 유지합니다.',
+  ], now: [
+    '기록 대상: 내역 등록, 수정, 줄 추가·삭제, 내역 삭제, 양식 생성, 양식 변경.',
+    '작성자는 "관리자 (예시)"로 고정되어 있습니다.',
+  ], ask: [
+    '작성자는 로그인 사용자, 시각은 서버 시각으로 기록하고, 서버에서도 수정·삭제를 막아 주세요.',
+  ] },
+];
+
+const root = document.getElementById('workhub-proto');
+const storageKey = 'workhub-dev-notes-visible';
+let visible = true;
+try { visible = localStorage.getItem(storageKey) !== 'false'; } catch {}
+const esc = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const checkedKey = 'workhub-dev-notes-checked';
+const noteKey = note => note.screen + '|' + note.title;
+let checked = new Set();
+try { checked = new Set(JSON.parse(localStorage.getItem(checkedKey)) || []); } catch {}
+const isChecked = note => checked.has(noteKey(note));
+const checkBox = note => '<label class="dn-check"><input type="checkbox" data-dn-check="' + esc(noteKey(note)) + '"' + (isChecked(note) ? ' checked' : '') + '>확인했습니다</label>';
+function setChecked(key, value) {
+  if (value) checked.add(key); else checked.delete(key);
+  try { localStorage.setItem(checkedKey, JSON.stringify([...checked])); } catch {}
+  pins.forEach((pin, note) => pin.classList.toggle('is-checked', isChecked(note)));
+  panel.classList.toggle('is-checked', !!activeNote && isChecked(activeNote));
+  document.querySelectorAll('[data-dn-check]').forEach(box => {
+    if (box.dataset.dnCheck !== key) return;
+    box.checked = value;
+    box.closest('.dn-list-note')?.classList.toggle('is-checked', value);
+  });
+  syncCount();
+}
+const sections = [['must', '요구사항'], ['now', '현재 동작'], ['ask', '개발 시 필요']];
+const noteSection = ([key, label], note) => note[key]?.length ? '<section class="dn-section dn-' + key + '"><h4>' + label + '</h4><ul>' + note[key].map(line => '<li>' + esc(line) + '</li>').join('') + '</ul></section>' : '';
+const noteBody = note => noteSection(sections[0], note) + (note.example ? '<section class="dn-section"><h4>예시</h4><pre class="dn-example">' + esc(note.example) + '</pre></section>' : '') + noteSection(sections[1], note) + noteSection(sections[2], note);
+
+const panel = document.createElement('div');
+panel.className = 'dn-panel';
+panel.setAttribute('popover', 'manual');
+panel.setAttribute('role', 'dialog');
+let activeNote = null, activePin = null;
+
+function closePanel(returnFocus) {
+  if (panel.matches(':popover-open')) panel.hidePopover();
+  activePin?.setAttribute('aria-expanded', 'false');
+  if (returnFocus && activePin?.isConnected) activePin.focus();
+  activeNote = null; activePin = null;
+}
+function placePanel() {
+  if (!activePin) return;
+  const rect = activePin.getBoundingClientRect(), width = panel.offsetWidth, height = panel.offsetHeight, gap = 8;
+  const fitsBelow = rect.bottom + gap + height <= innerHeight - 8;
+  panel.style.left = Math.max(8, Math.min(rect.left, innerWidth - width - 8)) + 'px';
+  panel.style.top = Math.max(8, fitsBelow ? rect.bottom + gap : rect.top - gap - height) + 'px';
+}
+function openPanel(note, pin) {
+  if (activeNote === note) { closePanel(true); return; }
+  closePanel(false);
+  // A modal dialog makes everything outside it inert, so the panel must live inside the dialog.
+  (pin.closest('dialog') || root).appendChild(panel);
+  panel.setAttribute('aria-label', note.title);
+  panel.innerHTML = '<div class="dn-panel-head"><div><small>' + esc(note.screen) + '</small><h3>' + esc(note.title) + '</h3></div><button type="button" class="wh-icon-btn" data-dn-close aria-label="메모 닫기"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>' + noteBody(note) + checkBox(note);
+  panel.classList.toggle('is-checked', isChecked(note));
+  panel.showPopover();
+  activeNote = note; activePin = pin;
+  pin.setAttribute('aria-expanded', 'true');
+  placePanel();
+  panel.querySelector('[data-dn-close]').focus();
+}
+panel.addEventListener('click', event => { if (event.target.closest('[data-dn-close]')) closePanel(true); });
+root.addEventListener('change', event => {
+  const box = event.target.closest?.('[data-dn-check]');
+  if (box) setChecked(box.dataset.dnCheck, box.checked);
+});
+document.addEventListener('pointerdown', event => {
+  if (activeNote && !panel.contains(event.target) && !event.target.closest('.dn-pin')) closePanel(false);
+}, true);
+// Esc closes the note first, so it can't also close the form underneath.
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && activeNote) { event.preventDefault(); event.stopPropagation(); closePanel(true); }
+}, true);
+
+function layerFor(host) {
+  let layer = [...host.children].find(child => child.classList.contains('dn-layer'));
+  if (!layer) { layer = document.createElement('div'); layer.className = 'dn-layer'; host.appendChild(layer); }
+  return layer;
+}
+function clippedOut(anchor, x, y) {
+  for (let el = anchor.parentElement; el && el !== document.body; el = el.parentElement) {
+    if (getComputedStyle(el).overflowX === 'visible' && getComputedStyle(el).overflowY === 'visible') continue;
+    const box = el.getBoundingClientRect();
+    if (x < box.left - 1 || x > box.right + 1 || y < box.top - 1 || y > box.bottom + 1) return true;
+  }
+  return false;
+}
+// Text gets its pin beside the words so nothing is covered; controls and containers get it on the corner.
+function pinPoint(anchor) {
+  const isTextOnly = !anchor.children.length && anchor.textContent.trim() && !anchor.matches('.wh-btn, .wh-icon-btn');
+  if (!isTextOnly) {
+    const rect = anchor.getBoundingClientRect();
+    return { x: rect.right + 1, y: rect.top - 3 };
+  }
+  const range = document.createRange();
+  range.selectNodeContents(anchor);
+  const rect = range.getBoundingClientRect();
+  return { x: rect.right + 11, y: rect.top + rect.height / 2 };
+}
+const pins = new Map();
+function update() {
+  const inTop = new Set();
+  if (visible) notes.forEach(note => {
+    const anchor = [...root.querySelectorAll(note.anchor)].find(el => el.getClientRects().length && !el.closest('.dn-panel'));
+    if (!anchor) return;
+    const host = anchor.closest('dialog') || root, point = pinPoint(anchor);
+    const x = Math.min(point.x, innerWidth - 16), y = point.y;
+    let pin = pins.get(note);
+    if (!pin) {
+      pin = document.createElement('button');
+      pin.type = 'button';
+      pin.className = 'dn-pin';
+      pin.setAttribute('aria-label', '개발 메모: ' + note.title);
+      pin.setAttribute('aria-expanded', 'false');
+      pin.setAttribute('aria-haspopup', 'dialog');
+      pin.title = note.title;
+      pin.innerHTML = '<img src="' + pinSrc + '" alt="" width="30" height="30">';
+      pin.classList.toggle('is-checked', isChecked(note));
+      pin.addEventListener('click', event => { event.stopPropagation(); openPanel(note, pin); });
+      pins.set(note, pin);
+    }
+    const layer = layerFor(host);
+    if (pin.parentElement !== layer) layer.appendChild(pin);
+    // Page pins scroll with the page on their own. Dialogs don't scroll the page, so theirs stay fixed.
+    const onPage = host === root;
+    pin.style.position = onPage ? 'absolute' : 'fixed';
+    pin.style.left = x + (onPage ? scrollX : 0) + 'px';
+    pin.style.top = y + (onPage ? scrollY : 0) + 'px';
+    // Test the anchor itself: a pin may sit slightly outside the box that clips its anchor.
+    const box = anchor.getBoundingClientRect();
+    pin.hidden = clippedOut(anchor, box.right - 2, box.top + 2);
+    inTop.add(note);
+  });
+  pins.forEach((pin, note) => {
+    if (inTop.has(note)) return;
+    if (activeNote === note) closePanel(false);
+    pin.remove();
+    pins.delete(note);
+  });
+  if (activeNote) placePanel();
+}
+let updateTimer = null;
+function scheduleUpdate() { clearTimeout(updateTimer); updateTimer = setTimeout(update, 16); }
+new MutationObserver(records => {
+  if (records.every(record => record.target.closest?.('.dn-layer, .dn-panel'))) return;
+  scheduleUpdate();
+}).observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open', 'class'] });
+addEventListener('scroll', update, { capture: true, passive: true });
+addEventListener('resize', scheduleUpdate);
+
+/* Controls and full list: pins only exist on the open screen, so the list keeps pop-up notes from being missed. */
+function openFullList() {
+  const screens = [...new Set(notes.map(note => note.screen))];
+  const dialog = document.createElement('dialog');
+  dialog.className = 'wh-dialog wh-dialog-wide dn-list';
+  dialog.setAttribute('aria-label', '전체 개발 메모');
+  dialog.innerHTML = '<div class="wh-dialog-head"><h3>전체 개발 메모 ' + notes.length + '개</h3><button type="button" class="wh-icon-btn" data-dn-list-close aria-label="닫기"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="wh-dialog-body">' + screens.map(screen => '<section class="dn-list-screen"><h3>' + esc(screen) + '</h3>' + notes.filter(note => note.screen === screen).map(note => '<article class="dn-list-note' + (isChecked(note) ? ' is-checked' : '') + '"><h4 class="dn-list-title">' + esc(note.title) + '</h4>' + noteBody(note) + checkBox(note) + '</article>').join('') + '</section>').join('') + '</div>';
+  root.appendChild(dialog);
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.querySelector('[data-dn-list-close]').onclick = () => { dialog.close(); dialog.remove(); };
+  dialog.showModal();
+}
+const controls = document.createElement('div');
+controls.className = 'dn-controls';
+controls.innerHTML = '<span>개발 메모 <b data-dn-count></b></span><button type="button" class="wh-btn wh-btn-sm" data-dn-all>전체 보기</button><button type="button" class="wh-btn wh-btn-sm" data-dn-toggle aria-pressed="' + visible + '"></button>';
+root.querySelector('.wh-pagehead .wh-chip').before(controls);
+function syncCount() {
+  const done = notes.filter(isChecked).length;
+  controls.querySelector('[data-dn-count]').textContent = '확인 ' + done + ' / ' + notes.length;
+}
+syncCount();
+const toggle = controls.querySelector('[data-dn-toggle]');
+function syncToggle() { toggle.textContent = visible ? '숨기기' : '표시'; toggle.setAttribute('aria-pressed', String(visible)); }
+syncToggle();
+toggle.onclick = () => {
+  visible = !visible;
+  try { localStorage.setItem(storageKey, String(visible)); } catch {}
+  if (!visible) closePanel(false);
+  syncToggle(); update();
+};
+controls.querySelector('[data-dn-all]').onclick = openFullList;
+window.workhubDevNotes = { notes };
+update();
+})();
+
+</script>
+</body>
+</html>

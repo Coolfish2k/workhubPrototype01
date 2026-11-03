@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorkHub 업무 양식 프로토타입</title>
+  <link rel="stylesheet" href="../workhub-source/styles.css">
+  <script src="../workhub-source/local-files.js" defer></script>
+  <script src="column-test-app.js" defer></script>
+</head>
+<body>
+<div id="workhub-proto" aria-label="WorkHub 업무 양식 프로토타입">
+
+<header class="wh-top"><div class="wh-brand"><span class="wh-logo">◎</span><div>SASOHAN<div class="wh-muted" style="letter-spacing:4px">WorkHub</div></div></div><nav class="wh-nav" aria-label="현재 사이트 위치"><span>홈</span><span>출결</span><span>휴가</span><span class="wh-current">게시판</span></nav></header>
+<div class="wh-row"><div><p class="wh-muted">홈 › 게시판 › 업무 양식</p><h1>업무 양식</h1></div><span class="wh-badge">PROTOTYPE · 예시 데이터</span></div>
+<div class="wh-layout"><aside><div class="wh-side-title wh-muted">게시판</div><div class="wh-legacy"><div class="wh-side-item">♧　공지 게시판</div><div class="wh-side-item">⚒　유지보수 게시판</div><div class="wh-side-item">▤　결제(환급) 요청</div><hr style="border:0;border-top:1px solid var(--wh-line);margin:15px 8px"></div><div class="wh-side-title wh-muted">직접 만든 업무 양식</div><div id="wh-boards"></div><button id="wh-new-board" style="margin-top:12px;width:100%;border-style:dashed">＋ 업무 양식 만들기</button></aside>
+<main class="wh-main"><div class="wh-row"><div><h2 id="wh-title"></h2><p id="wh-desc" class="wh-muted" style="margin-top:5px"></p></div><div id="wh-page-actions" class="wh-gap"></div></div>
+<div class="wh-tabs" role="tablist" aria-label="업무 공간"><button role="tab" id="wh-tab-list" class="wh-tab active" aria-controls="wh-panel" aria-selected="true" data-tab="list">데이터 목록</button><button role="tab" id="wh-tab-schema" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="schema">양식 설정</button><button role="tab" id="wh-tab-history" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="history">변경 이력</button></div>
+<section id="wh-panel" role="tabpanel" aria-labelledby="wh-tab-list"></section><div id="wh-toast" class="wh-toast" aria-live="polite"></div>
+</main></div><div class="wh-caption wh-muted"><span><span class="wh-dot"></span>WorkHub · 업무를 하나의 공간에</span><span>프로토타입 · 서버 저장 및 실제 권한 제어 미연결</span></div>
+
+</div>
+
+</body>
+</html>

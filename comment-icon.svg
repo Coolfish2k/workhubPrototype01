@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none" role="img" aria-label="댓글">
+  <defs>
+    <filter id="comment-icon-shadow" x="0" y="0" width="96" height="96" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#141e19" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <circle cx="48" cy="46" r="32" fill="#ffffff" filter="url(#comment-icon-shadow)"/>
+  <g transform="translate(30 28) scale(1.5)" stroke="#1d2822" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+  </g>
+</svg>

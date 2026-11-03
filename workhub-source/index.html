@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorkHub 업무 양식 프로토타입</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="local-files.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="dev-notes.js" defer></script>
+</head>
+<body>
+<div id="workhub-proto" aria-label="WorkHub 업무 양식 프로토타입">
+
+  <header class="wh-top">
+    <nav class="wh-nav wh-nav-left" aria-label="현재 사이트 위치">
+      <span>홈</span><span>출결</span><span>휴가</span><span>리포트</span>
+    </nav>
+    <div class="wh-brand">
+      <span class="wh-logo">
+        <svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true">
+          <defs><linearGradient id="whgNav" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9fbe6"></stop><stop offset="1" stop-color="#6fe3a3"></stop></linearGradient></defs>
+          <circle cx="12" cy="12" r="8.4" fill="none" stroke="url(#whgNav)" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="12.6 5" transform="rotate(-18 12 12)"></circle>
+          <circle cx="12" cy="12" r="5.2" fill="none" stroke="rgba(234,247,238,.35)" stroke-width="1" stroke-linecap="round" stroke-dasharray="8.2 2.7" transform="rotate(32 12 12)"></circle>
+          <circle cx="12" cy="12" r="3" fill="url(#whgNav)"></circle>
+          <circle cx="11" cy="11" r="0.9" fill="rgba(255,255,255,.85)"></circle>
+        </svg>
+      </span>
+      <span class="wh-wordmark"><b>SASOHAN</b><small>WorkHub</small></span>
+    </div>
+    <nav class="wh-nav wh-nav-right" aria-label="현재 사이트 위치 (계속)">
+      <span class="wh-current">게시판</span><span>운영현황 리포트</span><span>조직도</span>
+    </nav>
+  </header>
+
+  <div class="wh-pagehead">
+    <div>
+      <p class="wh-crumb">홈 <i data-icon="chevronRight"></i> 게시판 <i data-icon="chevronRight"></i> 업무 양식</p>
+      <h1>업무 양식</h1>
+    </div>
+    <span class="wh-chip">PROTOTYPE · 예시 데이터</span>
+  </div>
+
+  <div class="wh-layout">
+    <aside class="wh-side">
+      <div class="wh-legacy">
+        <div class="wh-side-title">게시판</div>
+        <div class="wh-side-item"><span class="wh-tile"><i data-icon="megaphone"></i></span><span>공지 게시판</span></div>
+        <div class="wh-side-item"><span class="wh-tile wh-tile-warn"><i data-icon="wrench"></i></span><span>유지보수 게시판</span></div>
+        <div class="wh-side-item"><span class="wh-tile"><i data-icon="card"></i></span><span>결제(환급) 요청</span></div>
+        <hr>
+      </div>
+      <div class="wh-side-title">직접 만든 업무 양식</div>
+      <div id="wh-boards" class="wh-boards"></div>
+      <button type="button" id="wh-new-board" class="wh-btn wh-btn-dashed"><i data-icon="plus"></i> 업무 양식 만들기</button>
+    </aside>
+
+    <main class="wh-main">
+      <h2 id="wh-title"></h2>
+      <p id="wh-desc" class="wh-desc"></p>
+      <div class="wh-tabrow">
+        <div class="wh-tabs" role="tablist" aria-label="업무 공간">
+          <button type="button" role="tab" id="wh-tab-list" class="wh-tab" aria-controls="wh-panel" aria-selected="true" data-tab="list">데이터 목록<span data-tab-count="list"></span></button>
+          <button type="button" role="tab" id="wh-tab-schema" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="schema">양식 설정<span data-tab-count="schema"></span></button>
+          <button type="button" role="tab" id="wh-tab-history" class="wh-tab" aria-controls="wh-panel" aria-selected="false" data-tab="history">변경 이력<span data-tab-count="history"></span></button>
+        </div>
+        <div id="wh-page-actions" class="wh-actions"></div>
+      </div>
+      <section id="wh-panel" role="tabpanel" aria-labelledby="wh-tab-list"></section>
+    </main>
+  </div>
+
+  <footer class="wh-caption">
+    <span>WorkHub · 업무를 하나의 공간에</span>
+    <span>프로토타입 · 서버 저장 및 실제 권한 제어 미연결</span>
+  </footer>
+
+  <div id="wh-toast" class="wh-toast" role="status" popover="manual"></div>
+</div>
+</body>
+</html>
